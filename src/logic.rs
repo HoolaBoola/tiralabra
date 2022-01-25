@@ -1,5 +1,9 @@
 pub fn calculate_infix(input: &str) -> String {
     shunting_yard(input)
+        .into_iter()
+        .map(|x| format!("{x:?}"))
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 fn precedence(c: char) -> Option<u8> {
@@ -7,17 +11,19 @@ fn precedence(c: char) -> Option<u8> {
         '+' | '-' => Some(2),
         '*' | '/' => Some(3),
         '^' => Some(4),
-        _ => None
+        _ => None,
     }
 }
 
-fn shunting_yard(input: &str) -> String {
+use Token::*;
+
+fn shunting_yard(input: &str) -> Vec<Token> {
     let mut output = Vec::new();
     let mut operators = Vec::new();
 
     for token in input.chars() {
         if token.is_digit(10) {
-            output.push(token);
+            output.push(Number(token.to_digit(10).unwrap() as u64));
             continue;
         }
 
@@ -33,7 +39,7 @@ fn shunting_yard(input: &str) -> String {
                         break;
                     }
                 }
-                output.push(operators.pop().unwrap());
+                output.push(Operator(operators.pop().unwrap()));
             }
 
             operators.push(token);
@@ -53,7 +59,7 @@ fn shunting_yard(input: &str) -> String {
                     break;
                 }
 
-                output.push(op);
+                output.push(Operator(op));
             }
 
             if !found {
@@ -62,7 +68,17 @@ fn shunting_yard(input: &str) -> String {
         }
     }
     while let Some(op) = operators.pop() {
-        output.push(op);
+        output.push(Operator(op));
     }
-    output.into_iter().collect()
+    output
+}
+
+#[derive(Debug)]
+enum Token {
+    Number(u64),
+    Operator(char),
+}
+
+#[cfg(test)]
+mod tests {
 }
