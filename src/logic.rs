@@ -73,7 +73,7 @@ fn shunting_yard(input: &str) -> Vec<Token> {
     output
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 enum Token {
     Number(u64),
     Operator(char),
@@ -81,4 +81,13 @@ enum Token {
 
 #[cfg(test)]
 mod tests {
+    
+    use super::*;
+
+    #[test]
+    fn single_digit_works() {
+        let test_str = "1";
+        let res = shunting_yard(test_str);
+        assert_eq!(res[0], Number(1));
+    }
 }
