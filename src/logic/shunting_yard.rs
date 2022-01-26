@@ -1,7 +1,11 @@
 use super::calculator::Token::{self, Number, Operator};
 
 /// Returns the precedence value for given operator, as described in
-/// [here](https://en.wikipedia.org/wiki/Shunting-yard_algorithm#Detailed_example)
+/// [here](https://en.wikipedia.org/wiki/Shunting-yard_algorithm#Detailed_example):
+///
+/// `+`, `-` -> 2,
+/// `*`, `/` -> 3,
+/// `^` -> 4
 ///
 /// ```
 /// precedence('+'); // Some(2)
@@ -25,16 +29,30 @@ fn precedence(c: char) -> Option<u8> {
 /// ```
 /// let input = "1 + 2 * 4";
 /// let res = shunting_yard(input).unwrap();
-/// // -> [Number(1), Number(2), Number(4), Operator('*'), Operator('+')]
+/// // -> [Number(1.0), Number(2.0), Number(4.0), Operator('*'), Operator('+')]
 /// ```
 pub fn shunting_yard(input: &str) -> Result<Vec<Token>, &str> {
     let mut output = Vec::new();
     let mut operators = Vec::new();
 
+    let mut current_num = String::new();
+
     for token in input.chars() {
-        if token.is_digit(10) {
-            output.push(Number(token.to_digit(10).unwrap() as u64));
+
+        if token.is_whitespace() {
             continue;
+        }
+
+        // push numbers to output
+        if token.is_digit(10) || token == '.' || token == ',' {
+            current_num.push(token);
+            // output.push(Number(token.to_digit(10).unwrap() as u64));
+            continue;
+        }
+
+        if current_num.len() > 0 {
+            output.push(Number(current_num.parse().unwrap()));
+            current_num.clear();
         }
 
         if let Some(p1) = precedence(token) {
@@ -77,6 +95,10 @@ pub fn shunting_yard(input: &str) -> Result<Vec<Token>, &str> {
             }
         }
     }
+
+    if current_num.len() > 0 {
+        output.push(Number(current_num.parse().unwrap()));
+    }
     while let Some(op) = operators.pop() {
         if op == '(' {
             return Err("Left parenthesis without a pair found");
@@ -95,14 +117,14 @@ mod shunting_yard_tests {
     fn single_digit_works() {
         let test_str = "1";
         let res = shunting_yard(test_str).unwrap();
-        assert_eq!(res[0], Number(1));
+        assert_eq!(res[0], Number(1.0));
     }
 
     #[test]
     fn one_plus_one_works() {
         let test_str = "1+1";
         let res = shunting_yard(test_str).unwrap();
-        let correct = vec![Number(1), Number(1), Operator('+')];
+        let correct = vec![Number(1.0), Number(1.0), Operator('+')];
         assert_eq!(res, correct);
     }
 
@@ -111,9 +133,9 @@ mod shunting_yard_tests {
         let test_str = "1 + 2 * 4";
         let res = shunting_yard(test_str).unwrap();
         let correct = vec![
-            Number(1),
-            Number(2),
-            Number(4),
+            Number(1.0),
+            Number(2.0),
+            Number(4.0),
             Operator('*'),
             Operator('+'),
         ];
