@@ -1,4 +1,4 @@
-use crate::logic;
+use crate::logic::calculator::calculate_infix;
 use std::io::{stdin, stdout, Write};
 
 pub fn main_loop() -> Result<(), Box<dyn std::error::Error>> {
@@ -16,7 +16,7 @@ pub fn main_loop() -> Result<(), Box<dyn std::error::Error>> {
             break;
         }
 
-        println!("{}", logic::calculate_infix(&input));
+        println!("{}", calculate_infix(&input));
         input.clear();
     }
     Ok(())

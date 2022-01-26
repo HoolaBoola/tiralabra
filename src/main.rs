@@ -2,5 +2,7 @@ mod logic;
 mod ui;
 
 fn main() {
-    ui::main_loop();
+    if let Err(error) = ui::main_loop() {
+        println!("Something bad happened: {error:?}");
+    }
 }
