@@ -1,3 +1,4 @@
+![coverage](./coverage/badges/flat.svg)
 
 ### Oikotiet dokumentaatioon
 
