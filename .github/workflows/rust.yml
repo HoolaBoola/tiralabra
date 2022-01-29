@@ -18,6 +18,7 @@ jobs:
           rm -rf target/doc
           cargo doc --no-deps
           echo "<meta http-equiv=\"refresh\" content=\"0; url=build_wheel\">" > target/doc/index.html
+          tree
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.2.2
