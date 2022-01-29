@@ -15,7 +15,9 @@ jobs:
 
       - name: Install and Build 🔧
         run: |
+          rm -rf target/doc
           cargo doc --no-deps
+          pwd
           tree -L 2
 
       - name: Deploy 🚀
