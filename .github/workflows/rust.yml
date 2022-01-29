@@ -15,6 +15,7 @@ jobs:
 
       - name: Install and Build 🔧
         run: |
+          git switch gh-pages
           rm -rf target/doc
           cargo doc --no-deps
           pwd
