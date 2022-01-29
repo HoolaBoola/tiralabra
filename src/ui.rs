@@ -16,7 +16,11 @@ pub fn main_loop() -> Result<(), Box<dyn std::error::Error>> {
             break;
         }
 
-        println!("{}", calculate_infix(&input));
+        match calculate_infix(&input) {
+            Ok(result) => println!("{result}"),
+            Err(err) => eprintln!("\tError:\n\t{err}")
+        }
+        
         input.clear();
     }
     Ok(())

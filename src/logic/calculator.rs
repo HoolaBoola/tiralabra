@@ -1,9 +1,9 @@
 use super::shunting_yard;
 use Token::*;
 
-pub fn calculate_infix(input: &str) -> String {
-    let res = shunting_yard(input).unwrap();
-    format!("{}", eval_postfix(res).unwrap())
+pub fn calculate_infix(input: &str) -> Result<String, &str> {
+    let res = shunting_yard(input)?;
+    Ok(format!("{}", eval_postfix(res)?))
 }
 
 fn eval_postfix(input: Vec<Token>) -> Result<f64, &'static str> {
@@ -131,5 +131,22 @@ mod operate_tests {
         let res = operate(1.0, 0.0, '/');
 
         assert!(res.is_nan());
+    }
+}
+
+#[cfg(test)]
+mod calculate_infix_tests {
+    use super::calculate_infix;
+
+    #[test]
+    fn input_only_operator_doesnt_panic() {
+        let res = calculate_infix("+");
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn parentheses_work() {
+        let res = calculate_infix("(1 + 2) * 3");
+        assert_eq!(res.unwrap(), "9");
     }
 }
