@@ -1,9 +1,22 @@
 use super::shunting_yard;
 use Token::*;
 
-pub fn calculate_infix(input: &str) -> Result<String, &str> {
-    let res = shunting_yard(input)?;
-    Ok(format!("{}", eval_postfix(res)?))
+pub struct Calculator {
+    history: Vec<Token>,
+}
+
+impl Calculator {
+
+    pub fn new() -> Calculator {
+        Calculator { history: Vec::new() }
+    }
+    /// Enter a string with an infix expression (example: "2 * (2 + 1)") as parameter.
+    /// Returns a result containing the evaluated result of the expression, or an error 
+    pub fn calculate_infix(&self, input: &str) -> Result<String, String> {
+        let res = shunting_yard(input)?;
+        Ok(format!("{}", eval_postfix(res)?))
+    }
+
 }
 
 fn eval_postfix(input: Vec<Token>) -> Result<f64, &'static str> {

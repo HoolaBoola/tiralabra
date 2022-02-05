@@ -1,5 +1,5 @@
-pub mod calculator;
-
+mod calculator;
+pub use calculator::Calculator;
 mod shunting_yard;
 
 // So that it's possible to just
