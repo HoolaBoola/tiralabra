@@ -28,12 +28,10 @@
 <span id="27">27</span>
 <span id="28">28</span>
 <span id="29">29</span>
-<span id="30">30</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::logic::Calculator</span>;
 <span class="kw">use</span> <span class="ident">std::io</span>::{<span class="ident">stdin</span>, <span class="ident">stdout</span>, <span class="ident">Write</span>};
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">main_loop</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std::error::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    
     <span class="kw">let</span> <span class="ident">calculator</span> <span class="op">=</span> <span class="ident">Calculator::new</span>();
 
     <span class="kw">let</span> <span class="ident">control_key</span> <span class="op">=</span> <span class="string">&quot;?&quot;</span>;
@@ -52,9 +50,9 @@
 
         <span class="kw">match</span> <span class="ident">calculator</span>.<span class="ident">calculate_infix</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>) {
             <span class="prelude-val">Ok</span>(<span class="ident">result</span>) =&gt; <span class="macro">println!</span>(<span class="string">&quot;{result}&quot;</span>),
-            <span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; <span class="macro">eprintln!</span>(<span class="string">&quot;\tError:\n\t{err}&quot;</span>)
+            <span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; <span class="macro">eprintln!</span>(<span class="string">&quot;\tError:\n\t{err}&quot;</span>),
         }
-        
+
         <span class="ident">input</span>.<span class="ident">clear</span>();
     }
     <span class="prelude-val">Ok</span>(())

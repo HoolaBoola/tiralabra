@@ -1,11 +1,11 @@
-use super::calculator::Token::{self, Float, Number, Variable, Operator};
+use super::calculator::Token::{self, Float, Number, Operator, Variable};
 
 pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
     let mut output = Vec::new();
-    
+
     let mut i = 0;
     while i < input.len() {
-        let &c = &input[i..i+1].chars().next().unwrap();
+        let &c = &input[i..i + 1].chars().next().unwrap();
         if is_operator(c) {
             output.push(Operator(c));
             i += 1;
@@ -17,7 +17,7 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
             let mut found_decimal = false;
 
             while end < input.len() {
-                let &c = &input[end..end+1].chars().next().unwrap();
+                let &c = &input[end..end + 1].chars().next().unwrap();
 
                 if c.is_digit(10) {
                     end += 1;
@@ -43,7 +43,7 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
             i = end;
             continue;
         }
-        
+
         if c.is_whitespace() {
             i += 1;
             continue;
@@ -53,7 +53,7 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
             let mut end = i + 1;
 
             while end < input.len() {
-                let &c = &input[end..end+1].chars().next().unwrap();
+                let &c = &input[end..end + 1].chars().next().unwrap();
 
                 if c.is_alphabetic() {
                     end += 1;
@@ -81,6 +81,6 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
 fn is_operator(c: char) -> bool {
     match c {
         '+' | '-' | '*' | '/' | '(' | ')' => true,
-        _ => false 
+        _ => false,
     }
 }

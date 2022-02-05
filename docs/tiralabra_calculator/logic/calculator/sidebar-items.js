@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["Token","Token can represent either a `Number` or an `Operator`"]],"fn":[["eval_postfix",""],["operate",""]],"struct":[["Calculator",""]]});
+initSidebarItems({"enum":[["Token","Token can represent either a `Number`, a `Float`, a `Variable` or an `Operator`"]],"fn":[["eval_postfix",""],["operate",""]],"struct":[["Calculator",""]]});

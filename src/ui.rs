@@ -2,7 +2,6 @@ use crate::logic::Calculator;
 use std::io::{stdin, stdout, Write};
 
 pub fn main_loop() -> Result<(), Box<dyn std::error::Error>> {
-    
     let calculator = Calculator::new();
 
     let control_key = "?";
@@ -21,9 +20,9 @@ pub fn main_loop() -> Result<(), Box<dyn std::error::Error>> {
 
         match calculator.calculate_infix(&input) {
             Ok(result) => println!("{result}"),
-            Err(err) => eprintln!("\tError:\n\t{err}")
+            Err(err) => eprintln!("\tError:\n\t{err}"),
         }
-        
+
         input.clear();
     }
     Ok(())

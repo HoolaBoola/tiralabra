@@ -1,4 +1,4 @@
-use super::calculator::Token::{self, Number, Operator};
+use super::calculator::Token::{self, Float, Number, Operator, Variable};
 
 /// Returns the precedence value for given operator, as described in
 /// [here](https://en.wikipedia.org/wiki/Shunting-yard_algorithm#Detailed_example):
@@ -23,88 +23,69 @@ fn precedence(c: char) -> Option<u8> {
 /// Performs Dijkstra's Shunting yard algorithm to convert mathematical
 /// expressions from infix notation to postfix (Reverse Polish Notation)
 ///
-/// input: &str containing a mathematical expression.
+/// input: Vec<Token> formed from an expression, with e.g. the `tokenize`-function in
+/// `logic::tokenize`
+///
 /// Returns `Result` with either a `Vec` of `Token`'s, or an error
 ///
 /// ```
 /// let input = "1 + 2 * 4";
-/// let res = shunting_yard(input).unwrap();
+/// let tokens = tokenize(input).unwrap();
+/// let res = shunting_yard(tokens).unwrap();
 /// // -> [Number(1.0), Number(2.0), Number(4.0), Operator('*'), Operator('+')]
 /// ```
-pub fn shunting_yard(input: &str) -> Result<Vec<Token>, &str> {
+pub fn shunting_yard(input: Vec<Token>) -> Result<Vec<Token>, &'static str> {
     let mut output = Vec::new();
     let mut operators = Vec::new();
 
-    let mut current_num = String::new();
-
-    for token in input.chars() {
-
-        if token.is_whitespace() {
-            continue;
-        }
-
-        // push numbers to output
-        if token.is_digit(10) || token == '.' || token == ',' {
-            current_num.push(token);
-            // output.push(Number(token.to_digit(10).unwrap() as u64));
-            continue;
-        }
-
-        if current_num.len() > 0 {
-            output.push(Number(current_num.parse().unwrap()));
-            current_num.clear();
-        }
-
-        if let Some(p1) = precedence(token) {
-            while operators.len() > 0 {
-                let last_operator = operators[operators.len() - 1];
-                if last_operator == '(' {
-                    break;
-                }
-
-                if let Some(p2) = precedence(last_operator) {
-                    if p2 <= p1 {
+    for token in input {
+        match token {
+            Operator('(') => operators.push('('),
+            Operator(')') => {
+                let mut found = false;
+                while let Some(op) = operators.pop() {
+                    if op == '(' {
+                        found = true;
                         break;
                     }
-                }
-                output.push(Operator(operators.pop().unwrap()));
-            }
 
-            operators.push(token);
-            continue;
-        }
-
-        if token == '(' {
-            operators.push(token);
-            continue;
-        }
-
-        if token == ')' {
-            let mut found = false;
-            while let Some(op) = operators.pop() {
-                if op == '(' {
-                    found = true;
-                    break;
+                    output.push(Operator(op));
                 }
 
-                output.push(Operator(op));
+                if !found {
+                    return Err("Right parenthesis without a pair found");
+                }
             }
+            Operator(op) => {
+                if let Some(p1) = precedence(op) {
+                    while operators.len() > 0 {
+                        let last_operator = operators[operators.len() - 1];
+                        if last_operator == '(' {
+                            break;
+                        }
 
-            if !found {
-                return Err("Right parenthesis without a pair found");
+                        if let Some(p2) = precedence(last_operator) {
+                            if p2 <= p1 {
+                                break;
+                            }
+                        }
+                        output.push(Operator(operators.pop().unwrap()));
+                    }
+
+                    operators.push(op);
+                }
             }
+            Number(_) | Float(_) | Variable(_) => output.push(token),
         }
     }
 
-    if current_num.len() > 0 {
-        output.push(Number(current_num.parse().unwrap()));
-    }
     while let Some(op) = operators.pop() {
         if op == '(' {
             return Err("Left parenthesis without a pair found");
         }
         output.push(Operator(op));
     }
+
     Ok(output)
 }
 
@@ -115,23 +96,29 @@ mod shunting_yard_tests {
 
     #[test]
     fn single_digit_works() {
-        let test_str = "1";
-        let res = shunting_yard(test_str).unwrap();
+        let tokens = vec![Number(1.0)];
+        let res = shunting_yard(tokens).unwrap();
         assert_eq!(res[0], Number(1.0));
     }
 
     #[test]
     fn one_plus_one_works() {
-        let test_str = "1+1";
-        let res = shunting_yard(test_str).unwrap();
+        let tokens = vec![Number(1.0), Operator('+'), Number(1.0)];
+        let res = shunting_yard(tokens).unwrap();
         let correct = vec![Number(1.0), Number(1.0), Operator('+')];
         assert_eq!(res, correct);
     }
 
     #[test]
     fn one_plus_two_times_four_works() {
-        let test_str = "1 + 2 * 4";
-        let res = shunting_yard(test_str).unwrap();
+        let tokens = vec![
+            Number(1.0),
+            Operator('+'),
+            Number(2.0),
+            Operator('*'),
+            Number(4.0),
+        ];
+        let res = shunting_yard(tokens).unwrap();
         let correct = vec![
             Number(1.0),
             Number(2.0),
@@ -144,15 +131,29 @@ mod shunting_yard_tests {
 
     #[test]
     fn mismatched_right_parenthesis_errors() {
-        let test_str = "1 + 2 * 3)";
-        let res = shunting_yard(test_str);
+        let tokens = vec![
+            Number(1.0),
+            Operator('+'),
+            Number(2.0),
+            Operator('*'),
+            Number(3.0),
+            Operator(')'),
+        ];
+        let res = shunting_yard(tokens);
         assert!(res.is_err());
     }
 
     #[test]
     fn mismatched_left_parenthesis_errors() {
-        let test_str = "1 + (2 * 3";
-        let res = shunting_yard(test_str);
+        let tokens = vec![
+            Number(1.0),
+            Operator('+'),
+            Operator('('),
+            Number(2.0),
+            Operator('*'),
+            Number(3.0),
+        ];
+        let res = shunting_yard(tokens);
         assert!(res.is_err());
     }
 }
