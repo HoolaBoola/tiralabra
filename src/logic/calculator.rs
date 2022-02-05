@@ -3,22 +3,22 @@ use super::tokenize;
 use Token::*;
 
 pub struct Calculator {
-    history: Vec<Token>,
+    _history: Vec<Token>,
 }
 
 impl Calculator {
-
     pub fn new() -> Calculator {
-        Calculator { history: Vec::new() }
+        Calculator {
+            _history: Vec::new(),
+        }
     }
     /// Enter a string with an infix expression (example: "2 * (2 + 1)") as parameter.
-    /// Returns a result containing the evaluated result of the expression, or an error 
+    /// Returns a result containing the evaluated result of the expression, or an error
     pub fn calculate_infix(&self, input: &str) -> Result<String, String> {
-
-        let res = shunting_yard(input)?;
-        Ok(format!("{}", eval_postfix(res)?))
+        let tokens = tokenize(input)?;
+        let postfix = shunting_yard(tokens)?;
+        Ok(format!("{}", eval_postfix(postfix)?))
     }
-
 }
 
 fn eval_postfix(input: Vec<Token>) -> Result<f64, &'static str> {
@@ -31,8 +31,8 @@ fn eval_postfix(input: Vec<Token>) -> Result<f64, &'static str> {
                 let a = stack.pop().ok_or("Too many operators")?;
                 let b = stack.pop().ok_or("Too many operators")?;
                 stack.push(operate(b, a, op))
-            },
-            _ => ()
+            }
+            _ => (),
         }
     }
 
@@ -45,12 +45,18 @@ fn operate(a: f64, b: f64, c: char) -> f64 {
         '+' => a + b,
         '-' => a - b,
         '*' => a * b,
-        '/' => if b != 0.0 { a / b } else { f64::NAN },
+        '/' => {
+            if b != 0.0 {
+                a / b
+            } else {
+                f64::NAN
+            }
+        }
         _ => 0.0,
     }
 }
 
-/// Token can represent either a `Number` or an `Operator`
+/// Token can represent either a `Number`, a `Float`, a `Variable` or an `Operator`
 ///
 /// Now, one can create a `Vec<Token>` with numbers and operators mixed without
 /// losing type safety.
@@ -66,7 +72,7 @@ pub enum Token {
     Number(f64),
     Operator(char),
     Float(f64),
-    Variable(String)
+    Variable(String),
 }
 
 #[cfg(test)]
@@ -85,13 +91,19 @@ mod eval_postfix_tests {
     fn one_one_plus_works() {
         let test_vec = vec![Number(1.0), Number(1.0), Operator('+')];
         let res = eval_postfix(test_vec).unwrap();
-        
+
         assert_eq!(res, 2.0);
     }
 
     #[test]
     fn three_two_mul_four_plus_works() {
-        let test_vec = vec![Number(3.0), Number(2.0), Operator('*'), Number(4.0), Operator('+')];
+        let test_vec = vec![
+            Number(3.0),
+            Number(2.0),
+            Operator('*'),
+            Number(4.0),
+            Operator('+'),
+        ];
         let res = eval_postfix(test_vec).unwrap();
 
         assert_eq!(res, 10.0);
@@ -134,7 +146,7 @@ mod operate_tests {
     #[test]
     fn one_minus_two_is_minus_one() {
         let res = operate(1.0, 2.0, '-');
-        
+
         assert_eq!(res, -1.0);
     }
 
@@ -155,17 +167,19 @@ mod operate_tests {
 
 #[cfg(test)]
 mod calculate_infix_tests {
-    use super::calculate_infix;
+    use super::Calculator;
 
     #[test]
     fn input_only_operator_doesnt_panic() {
-        let res = calculate_infix("+");
+        let calculator = Calculator::new();
+        let res = calculator.calculate_infix("+");
         assert!(res.is_err());
     }
 
     #[test]
     fn parentheses_work() {
-        let res = calculate_infix("(1 + 2) * 3");
+        let calculator = Calculator::new();
+        let res = calculator.calculate_infix("(1 + 2) * 3");
         assert_eq!(res.unwrap(), "9");
     }
 }
