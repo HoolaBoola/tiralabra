@@ -11,3 +11,5 @@ Koodikattavuus ei vielä näy missään nettisivulla, mutta [coverage](./coverag
     - [Toteutusdokumentti](./dokumentaatio/TOTEUTUS.md)
     - [Viikkoraportit](./dokumentaatio/viikkoraportit)
         - [Viikko 1](./dokumentaatio/viikkoraportit/viikko1.md)
+        - [Viikko 1](./dokumentaatio/viikkoraportit/viikko2.md)
+        - [Viikko 1](./dokumentaatio/viikkoraportit/viikko3.md)
