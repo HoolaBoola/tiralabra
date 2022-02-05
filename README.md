@@ -1,5 +1,7 @@
 ![coverage](./coverage/badges/flat.svg)
 
+Koodikattavuus ei vielä näy missään nettisivulla, mutta [coverage](./coverage)-kansiossa on vaadittavat HTML-tiedostot kattavuustiedon näyttämiseen.
+
 ### Oikotiet dokumentaatioon
 
 - [Dokumentaatio](./dokumentaatio)
