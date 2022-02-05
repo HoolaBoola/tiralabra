@@ -1,9 +1,24 @@
 use super::shunting_yard;
+use super::tokenize;
 use Token::*;
 
-pub fn calculate_infix(input: &str) -> Result<String, &str> {
-    let res = shunting_yard(input)?;
-    Ok(format!("{}", eval_postfix(res)?))
+pub struct Calculator {
+    history: Vec<Token>,
+}
+
+impl Calculator {
+
+    pub fn new() -> Calculator {
+        Calculator { history: Vec::new() }
+    }
+    /// Enter a string with an infix expression (example: "2 * (2 + 1)") as parameter.
+    /// Returns a result containing the evaluated result of the expression, or an error 
+    pub fn calculate_infix(&self, input: &str) -> Result<String, String> {
+
+        let res = shunting_yard(input)?;
+        Ok(format!("{}", eval_postfix(res)?))
+    }
+
 }
 
 fn eval_postfix(input: Vec<Token>) -> Result<f64, &'static str> {
@@ -11,11 +26,13 @@ fn eval_postfix(input: Vec<Token>) -> Result<f64, &'static str> {
     for token in input {
         match token {
             Number(num) => stack.push(num),
+            Float(num) => stack.push(num),
             Operator(op) => {
                 let a = stack.pop().ok_or("Too many operators")?;
                 let b = stack.pop().ok_or("Too many operators")?;
                 stack.push(operate(b, a, op))
-            }
+            },
+            _ => ()
         }
     }
 
@@ -48,6 +65,8 @@ fn operate(a: f64, b: f64, c: char) -> f64 {
 pub enum Token {
     Number(f64),
     Operator(char),
+    Float(f64),
+    Variable(String)
 }
 
 #[cfg(test)]
