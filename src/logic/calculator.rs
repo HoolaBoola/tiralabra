@@ -40,9 +40,11 @@ impl Calculator {
         let postfix = shunting_yard(tokens)?;
         let result = self.eval_postfix(postfix)?;
 
+        // if the expression is supposed to assign to a variable,
+        // insert the key-value pair into `variables`
         if let Some(var_list) = variable {
             if var_list.len() > 1 {
-                return Err("Too many operands before '='".to_string());
+                return Err("Too many tokens before '='".to_string());
             }
 
             if let Variable(variable) = &var_list[0] {
@@ -122,22 +124,25 @@ mod eval_postfix_tests {
 
     #[test]
     fn single_digit_works() {
+        let calculator = Calculator::new();
         let test_vec = vec![Number(1.0)];
-        let res = eval_postfix(test_vec).unwrap();
+        let res = calculator.eval_postfix(test_vec).unwrap();
 
         assert_eq!(res, 1.0);
     }
 
     #[test]
     fn one_one_plus_works() {
+        let  calculator = Calculator::new();
         let test_vec = vec![Number(1.0), Number(1.0), Operator('+')];
-        let res = eval_postfix(test_vec).unwrap();
+        let res = calculator.eval_postfix(test_vec).unwrap();
 
         assert_eq!(res, 2.0);
     }
 
     #[test]
     fn three_two_mul_four_plus_works() {
+        let  calculator = Calculator::new();
         let test_vec = vec![
             Number(3.0),
             Number(2.0),
@@ -145,15 +150,16 @@ mod eval_postfix_tests {
             Number(4.0),
             Operator('+'),
         ];
-        let res = eval_postfix(test_vec).unwrap();
+        let res = calculator.eval_postfix(test_vec).unwrap();
 
         assert_eq!(res, 10.0);
     }
 
     #[test]
     fn operator_before_numbers_gives_error() {
+        let  calculator = Calculator::new();
         let test_vec = vec![Operator('+'), Number(1.0), Number(2.0)];
-        let res = eval_postfix(test_vec);
+        let res = calculator.eval_postfix(test_vec);
 
         assert!(res.is_err());
     }
@@ -212,14 +218,14 @@ mod calculate_infix_tests {
 
     #[test]
     fn input_only_operator_doesnt_panic() {
-        let calculator = Calculator::new();
+        let mut calculator = Calculator::new();
         let res = calculator.calculate_infix("+");
         assert!(res.is_err());
     }
 
     #[test]
     fn parentheses_work() {
-        let calculator = Calculator::new();
+        let mut calculator = Calculator::new();
         let res = calculator.calculate_infix("(1 + 2) * 3");
         assert_eq!(res.unwrap(), "9");
     }
