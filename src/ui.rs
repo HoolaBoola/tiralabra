@@ -20,7 +20,7 @@ pub fn main_loop() -> Result<(), Box<dyn std::error::Error>> {
 
         match calculator.calculate_infix(&input) {
             Ok(result) => println!("{result}"),
-            Err(err) => eprintln!("\tError:\n\t{err}"),
+            Err(err) => eprintln!("Error:\n{err}"),
         }
 
         input.clear();

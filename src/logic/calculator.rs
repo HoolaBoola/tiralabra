@@ -3,6 +3,30 @@ use super::tokenize;
 use Token::*;
 use std::collections::HashMap;
 
+
+/// Struct for keeping track of history and variables, and performing calculations.
+///
+/// Example:
+///
+/// ```
+/// let mut calculator = Calculator::new();
+/// let result = calculator.calculate_infix("(1 + 2) * 3").unwrap();
+///
+/// assert_eq!(result, "9");
+/// ```
+///
+/// With variables:
+/// ```
+/// let mut calculator = Calculator::new();
+/// 
+/// // returns a's value, in this case 1
+/// let result = calculator.calculate_infix("a = 1").unwrap();
+/// assert_eq!(result, "1");
+///
+/// let result = calulator.calculator_infix("a + 1").unwrap();
+/// assert_eq!(result, "2");
+/// ```
+///
 pub struct Calculator {
     history: Vec<String>,
     variables: HashMap<String, f64>
@@ -43,10 +67,20 @@ impl Calculator {
         // if the expression is supposed to assign to a variable,
         // insert the key-value pair into `variables`
         if let Some(var_list) = variable {
+
+            // if expression has more than one token before =
+            // (e.g. "a b = 1 + 1")
             if var_list.len() > 1 {
                 return Err("Too many tokens before '='".to_string());
             }
+            // if expression starts with =
+            // (e.g. "= 1 + 1")
+            if var_list.len() == 0 {
+                return Err("Variable required before '='".to_string());
+            }
 
+            // Get the first (only) item from the list and insert it into `self.variables` 
+            // with the corresponding value
             if let Variable(variable) = &var_list[0] {
                 self.variables.insert(variable.to_string(), result);
             } else {
@@ -94,7 +128,8 @@ fn operate(a: f64, b: f64, c: char) -> f64 {
             } else {
                 f64::NAN
             }
-        }
+        },
+        '^' => a.powf(b),
         _ => 0.0,
     }
 }
