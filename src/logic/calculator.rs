@@ -1,43 +1,84 @@
 use super::shunting_yard;
 use super::tokenize;
 use Token::*;
+use std::collections::HashMap;
 
 pub struct Calculator {
-    _history: Vec<Token>,
+    history: Vec<String>,
+    variables: HashMap<String, f64>
 }
 
 impl Calculator {
     pub fn new() -> Calculator {
         Calculator {
-            _history: Vec::new(),
+            history: Vec::new(),
+            variables: HashMap::new()
         }
     }
+
     /// Enter a string with an infix expression (example: "2 * (2 + 1)") as parameter.
     /// Returns a result containing the evaluated result of the expression, or an error
-    pub fn calculate_infix(&self, input: &str) -> Result<String, String> {
+    pub fn calculate_infix(&mut self, input: &str) -> Result<String, String> {
+        self.history.push(input.to_string());
+        let mut eq_position = None;
+
+        // find the position of the '=' character, if it exists
+        for (i, c) in input.chars().enumerate() {
+            if c == '=' {
+                eq_position = Some(i);
+                break;
+            }
+        }
+
+        // if the input string contains a '=', split it into two parts
+        let (variable, input) = if let Some(i) = eq_position {
+            (Some(tokenize(&input[..i])?), &input[i + 1..])
+        } else {
+            (None, input)
+        };
         let tokens = tokenize(input)?;
         let postfix = shunting_yard(tokens)?;
-        Ok(format!("{}", eval_postfix(postfix)?))
-    }
-}
+        let result = self.eval_postfix(postfix)?;
 
-fn eval_postfix(input: Vec<Token>) -> Result<f64, &'static str> {
-    let mut stack = Vec::new();
-    for token in input {
-        match token {
-            Number(num) => stack.push(num),
-            Float(num) => stack.push(num),
-            Operator(op) => {
-                let a = stack.pop().ok_or("Too many operators")?;
-                let b = stack.pop().ok_or("Too many operators")?;
-                stack.push(operate(b, a, op))
+        if let Some(var_list) = variable {
+            if var_list.len() > 1 {
+                return Err("Too many operands before '='".to_string());
             }
-            _ => (),
+
+            if let Variable(variable) = &var_list[0] {
+                self.variables.insert(variable.to_string(), result);
+            } else {
+                return Err("Malformed input before '='".to_string());
+            }
         }
+        Ok(format!("{result}"))
     }
 
-    let res = stack.pop().ok_or("Too many operators")?;
-    Ok(res)
+    fn eval_postfix(&self, input: Vec<Token>) -> Result<f64, String> {
+        let mut stack = Vec::new();
+        for token in input {
+            match token {
+                Number(num) => stack.push(num),
+                Float(num) => stack.push(num),
+                Operator(op) => {
+                    let a = stack.pop().ok_or("Too many operators")?;
+                    let b = stack.pop().ok_or("Too many operators")?;
+                    stack.push(operate(b, a, op))
+                },
+                Variable(var) => {
+                    if let Some(&val) = self.variables.get(&var) {
+                        stack.push(val);
+                    } else {
+                        return Err(format!("Undefined variable: {var}"));
+                    }
+                }
+            }
+        }
+
+        let res = stack.pop().ok_or("Too many operators")?;
+        Ok(res)
+    }
+
 }
 
 fn operate(a: f64, b: f64, c: char) -> f64 {
