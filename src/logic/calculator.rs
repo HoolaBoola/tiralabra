@@ -1,43 +1,86 @@
 use super::shunting_yard;
 use super::tokenize;
 use Token::*;
+use std::collections::HashMap;
 
 pub struct Calculator {
-    _history: Vec<Token>,
+    history: Vec<String>,
+    variables: HashMap<String, f64>
 }
 
 impl Calculator {
     pub fn new() -> Calculator {
         Calculator {
-            _history: Vec::new(),
+            history: Vec::new(),
+            variables: HashMap::new()
         }
     }
+
     /// Enter a string with an infix expression (example: "2 * (2 + 1)") as parameter.
     /// Returns a result containing the evaluated result of the expression, or an error
-    pub fn calculate_infix(&self, input: &str) -> Result<String, String> {
+    pub fn calculate_infix(&mut self, input: &str) -> Result<String, String> {
+        self.history.push(input.to_string());
+        let mut eq_position = None;
+
+        // find the position of the '=' character, if it exists
+        for (i, c) in input.chars().enumerate() {
+            if c == '=' {
+                eq_position = Some(i);
+                break;
+            }
+        }
+
+        // if the input string contains a '=', split it into two parts
+        let (variable, input) = if let Some(i) = eq_position {
+            (Some(tokenize(&input[..i])?), &input[i + 1..])
+        } else {
+            (None, input)
+        };
         let tokens = tokenize(input)?;
         let postfix = shunting_yard(tokens)?;
-        Ok(format!("{}", eval_postfix(postfix)?))
-    }
-}
+        let result = self.eval_postfix(postfix)?;
 
-fn eval_postfix(input: Vec<Token>) -> Result<f64, &'static str> {
-    let mut stack = Vec::new();
-    for token in input {
-        match token {
-            Number(num) => stack.push(num),
-            Float(num) => stack.push(num),
-            Operator(op) => {
-                let a = stack.pop().ok_or("Too many operators")?;
-                let b = stack.pop().ok_or("Too many operators")?;
-                stack.push(operate(b, a, op))
+        // if the expression is supposed to assign to a variable,
+        // insert the key-value pair into `variables`
+        if let Some(var_list) = variable {
+            if var_list.len() > 1 {
+                return Err("Too many tokens before '='".to_string());
             }
-            _ => (),
+
+            if let Variable(variable) = &var_list[0] {
+                self.variables.insert(variable.to_string(), result);
+            } else {
+                return Err("Malformed input before '='".to_string());
+            }
         }
+        Ok(format!("{result}"))
     }
 
-    let res = stack.pop().ok_or("Too many operators")?;
-    Ok(res)
+    fn eval_postfix(&self, input: Vec<Token>) -> Result<f64, String> {
+        let mut stack = Vec::new();
+        for token in input {
+            match token {
+                Number(num) => stack.push(num),
+                Float(num) => stack.push(num),
+                Operator(op) => {
+                    let a = stack.pop().ok_or("Too many operators")?;
+                    let b = stack.pop().ok_or("Too many operators")?;
+                    stack.push(operate(b, a, op))
+                },
+                Variable(var) => {
+                    if let Some(&val) = self.variables.get(&var) {
+                        stack.push(val);
+                    } else {
+                        return Err(format!("Undefined variable: {var}"));
+                    }
+                }
+            }
+        }
+
+        let res = stack.pop().ok_or("Too many operators")?;
+        Ok(res)
+    }
+
 }
 
 fn operate(a: f64, b: f64, c: char) -> f64 {
@@ -81,22 +124,25 @@ mod eval_postfix_tests {
 
     #[test]
     fn single_digit_works() {
+        let calculator = Calculator::new();
         let test_vec = vec![Number(1.0)];
-        let res = eval_postfix(test_vec).unwrap();
+        let res = calculator.eval_postfix(test_vec).unwrap();
 
         assert_eq!(res, 1.0);
     }
 
     #[test]
     fn one_one_plus_works() {
+        let  calculator = Calculator::new();
         let test_vec = vec![Number(1.0), Number(1.0), Operator('+')];
-        let res = eval_postfix(test_vec).unwrap();
+        let res = calculator.eval_postfix(test_vec).unwrap();
 
         assert_eq!(res, 2.0);
     }
 
     #[test]
     fn three_two_mul_four_plus_works() {
+        let  calculator = Calculator::new();
         let test_vec = vec![
             Number(3.0),
             Number(2.0),
@@ -104,15 +150,16 @@ mod eval_postfix_tests {
             Number(4.0),
             Operator('+'),
         ];
-        let res = eval_postfix(test_vec).unwrap();
+        let res = calculator.eval_postfix(test_vec).unwrap();
 
         assert_eq!(res, 10.0);
     }
 
     #[test]
     fn operator_before_numbers_gives_error() {
+        let  calculator = Calculator::new();
         let test_vec = vec![Operator('+'), Number(1.0), Number(2.0)];
-        let res = eval_postfix(test_vec);
+        let res = calculator.eval_postfix(test_vec);
 
         assert!(res.is_err());
     }
@@ -171,14 +218,14 @@ mod calculate_infix_tests {
 
     #[test]
     fn input_only_operator_doesnt_panic() {
-        let calculator = Calculator::new();
+        let mut calculator = Calculator::new();
         let res = calculator.calculate_infix("+");
         assert!(res.is_err());
     }
 
     #[test]
     fn parentheses_work() {
-        let calculator = Calculator::new();
+        let mut calculator = Calculator::new();
         let res = calculator.calculate_infix("(1 + 2) * 3");
         assert_eq!(res.unwrap(), "9");
     }

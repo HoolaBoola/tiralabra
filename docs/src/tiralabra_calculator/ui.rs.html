@@ -32,7 +32,7 @@
 <span class="kw">use</span> <span class="ident">std::io</span>::{<span class="ident">stdin</span>, <span class="ident">stdout</span>, <span class="ident">Write</span>};
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">main_loop</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std::error::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">calculator</span> <span class="op">=</span> <span class="ident">Calculator::new</span>();
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">calculator</span> <span class="op">=</span> <span class="ident">Calculator::new</span>();
 
     <span class="kw">let</span> <span class="ident">control_key</span> <span class="op">=</span> <span class="string">&quot;?&quot;</span>;
 
