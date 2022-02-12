@@ -58,7 +58,7 @@ pub fn shunting_yard(input: Vec<Token>) -> Result<Vec<Token>, &'static str> {
             }
             Operator(op) => {
                 if let Some(p1) = precedence(op) {
-                    while operators.len() > 0 {
+                    while !operators.is_empty() {
                         let last_operator = operators[operators.len() - 1];
                         if last_operator == '(' {
                             break;
