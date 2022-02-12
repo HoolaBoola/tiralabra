@@ -343,7 +343,7 @@
             }
             <span class="comment">// if expression starts with =</span>
             <span class="comment">// (e.g. &quot;= 1 + 1&quot;)</span>
-            <span class="kw">if</span> <span class="ident">var_list</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">0</span> {
+            <span class="kw">if</span> <span class="ident">var_list</span>.<span class="ident">is_empty</span>() {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Variable required before &#39;=&#39;&quot;</span>.<span class="ident">to_string</span>());
             }
 

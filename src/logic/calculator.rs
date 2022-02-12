@@ -75,7 +75,7 @@ impl Calculator {
             }
             // if expression starts with =
             // (e.g. "= 1 + 1")
-            if var_list.len() == 0 {
+            if var_list.is_empty() {
                 return Err("Variable required before '='".to_string());
             }
 
