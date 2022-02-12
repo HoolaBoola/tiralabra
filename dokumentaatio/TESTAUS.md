@@ -19,3 +19,15 @@ Yksikkötestien kirjoittaminen tähän projektiin on melko suoraviivaista – sy
 Suorituskykytestaus ei tässä projektissa ole kovin mielekästä – suuretkin laskutoimitukset suoriutuvat sekunnin murto-osassa lineaarisen aikakompleksisuuden takia.
 
 ---
+
+### Tyylin testaus 
+
+Rustissa on oletuksena checkstyle-tyylinen, hyvät defaultit omaava työkalu Clippy (aja komentorivillä käyttäen `cargo clippy`). Clippyn tulostus saattaa olla esimerkiksi tällainen:
+
+```
+   |
+78 |             if var_list.len() == 0 {
+   |                ^^^^^^^^^^^^^^^^^^^ help: using `is_empty` is clearer and more explicit: `var_list.is_empty()`
+```
+
+Tarkoitus on ottaa käyttöön Github Actioneissa tämän automatisointi.
