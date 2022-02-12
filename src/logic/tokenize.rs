@@ -80,7 +80,7 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
 
 fn is_operator(c: char) -> bool {
     match c {
-        '+' | '-' | '*' | '/' | '(' | ')' => true,
+        '+' | '-' | '*' | '/' | '(' | ')' | '^' => true,
         _ => false,
     }
 }
