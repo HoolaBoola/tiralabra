@@ -2,6 +2,8 @@ Käytetyt tunnit: 6
 
 ### Mitä tein tällä viikolla?
 
+Kirjoitin [testaus](../TESTAUS.md)- ja [käyttöohje](../KÄYTTÖOHJE.md)dokumentaatiota
+
 Lukujen nostaminen potensseihin toimii nyt!
 
 Sovelluksessa voi nyt hyödyntää muuttujia! 
