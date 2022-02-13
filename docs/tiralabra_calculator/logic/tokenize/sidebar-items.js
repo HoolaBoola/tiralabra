@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["is_operator",""],["tokenize",""]]});
+initSidebarItems({"fn":[["is_operator","Return true if `c` is one of the defined mathematical operators"],["tokenize","Tokenize a string into a `Vec` of Tokens."]]});

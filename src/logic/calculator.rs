@@ -1,8 +1,7 @@
 use super::shunting_yard;
 use super::tokenize;
-use Token::*;
 use std::collections::HashMap;
-
+use Token::*;
 
 /// Struct for keeping track of history and variables, and performing calculations.
 ///
@@ -18,7 +17,7 @@ use std::collections::HashMap;
 /// With variables:
 /// ```
 /// let mut calculator = Calculator::new();
-/// 
+///
 /// // returns a's value, in this case 1
 /// let result = calculator.calculate_infix("a = 1").unwrap();
 /// assert_eq!(result, "1");
@@ -29,14 +28,14 @@ use std::collections::HashMap;
 ///
 pub struct Calculator {
     history: Vec<String>,
-    variables: HashMap<String, f64>
+    variables: HashMap<String, f64>,
 }
 
 impl Calculator {
     pub fn new() -> Calculator {
         Calculator {
             history: Vec::new(),
-            variables: HashMap::new()
+            variables: HashMap::new(),
         }
     }
 
@@ -67,7 +66,6 @@ impl Calculator {
         // if the expression is supposed to assign to a variable,
         // insert the key-value pair into `variables`
         if let Some(var_list) = variable {
-
             // if expression has more than one token before =
             // (e.g. "a b = 1 + 1")
             if var_list.len() > 1 {
@@ -79,7 +77,7 @@ impl Calculator {
                 return Err("Variable required before '='".to_string());
             }
 
-            // Get the first (only) item from the list and insert it into `self.variables` 
+            // Get the first (only) item from the list and insert it into `self.variables`
             // with the corresponding value
             if let Variable(variable) = &var_list[0] {
                 self.variables.insert(variable.to_string(), result);
@@ -100,7 +98,7 @@ impl Calculator {
                     let a = stack.pop().ok_or("Too many operators")?;
                     let b = stack.pop().ok_or("Too many operators")?;
                     stack.push(operate(b, a, op))
-                },
+                }
                 Variable(var) => {
                     if let Some(&val) = self.variables.get(&var) {
                         stack.push(val);
@@ -114,7 +112,6 @@ impl Calculator {
         let res = stack.pop().ok_or("Too many operators")?;
         Ok(res)
     }
-
 }
 
 fn operate(a: f64, b: f64, c: char) -> f64 {
@@ -128,7 +125,7 @@ fn operate(a: f64, b: f64, c: char) -> f64 {
             } else {
                 f64::NAN
             }
-        },
+        }
         '^' => a.powf(b),
         _ => 0.0,
     }
@@ -168,7 +165,7 @@ mod eval_postfix_tests {
 
     #[test]
     fn one_one_plus_works() {
-        let  calculator = Calculator::new();
+        let calculator = Calculator::new();
         let test_vec = vec![Number(1.0), Number(1.0), Operator('+')];
         let res = calculator.eval_postfix(test_vec).unwrap();
 
@@ -177,7 +174,7 @@ mod eval_postfix_tests {
 
     #[test]
     fn three_two_mul_four_plus_works() {
-        let  calculator = Calculator::new();
+        let calculator = Calculator::new();
         let test_vec = vec![
             Number(3.0),
             Number(2.0),
@@ -192,7 +189,7 @@ mod eval_postfix_tests {
 
     #[test]
     fn operator_before_numbers_gives_error() {
-        let  calculator = Calculator::new();
+        let calculator = Calculator::new();
         let test_vec = vec![Operator('+'), Number(1.0), Number(2.0)];
         let res = calculator.eval_postfix(test_vec);
 
