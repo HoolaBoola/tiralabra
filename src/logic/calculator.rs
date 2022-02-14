@@ -114,7 +114,7 @@ impl Calculator {
         let res = stack.pop().ok_or("Too many operators")?;
 
         if !stack.is_empty() {
-            return Err(format!("Too many numbers!"));
+            return Err("Too many numbers!".to_string());
         }
         Ok(res)
     }
@@ -194,9 +194,28 @@ mod eval_postfix_tests {
     }
 
     #[test]
-    fn operator_before_numbers_gives_error() {
+    fn operator_before_numbers_returns_error() {
         let calculator = Calculator::new();
         let test_vec = vec![Operator('+'), Number(1.0), Number(2.0)];
+        let res = calculator.eval_postfix(test_vec);
+
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn too_many_operators_returns_error() {
+        let calculator = Calculator::new();
+        let test_vec = vec![Number(1.0), Number(1.0), Operator('*'), Operator('+')];
+
+        let res = calculator.eval_postfix(test_vec);
+
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn too_many_numbers_returns_error() {
+        let calculator = Calculator::new();
+        let test_vec = vec![Number(1.0), Number(1.0), Operator('/'), Number(1.0)];
         let res = calculator.eval_postfix(test_vec);
 
         assert!(res.is_err());

@@ -15,36 +15,43 @@ use super::calculator::Token::{self, Float, Number, Operator, Variable};
 pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
     let mut output = Vec::new();
 
-    let mut i = 0;
-    while i < input.len() {
-        let &c = &input[i..i + 1].chars().next().unwrap();
+    let mut chars = input.chars().peekable();
+
+    loop {
+        let c = chars.next();
+        if c.is_none() {
+            break;
+        }
+        let c = c.unwrap();
 
         // handle case of `c` being one of '+', '/', etc.
         if is_operator(c) {
             output.push(Operator(c));
-            i += 1;
             continue;
         }
 
         // if `c` is a digit (0 <= c <= 9) then find out how long the number is
         if c.is_digit(10) {
-            let mut end = i + 1;
+            let mut num_string = String::new();
+            num_string.push(c);
             let mut found_decimal = false;
 
             // if the current number is more than one digit (e.g. 13),
             // need to loop to find the end
-            while end < input.len() {
-                let &c = &input[end..end + 1].chars().next().unwrap();
-
-                if c.is_digit(10) {
-                    end += 1;
-                } else if c == '.' {
-                    if found_decimal {
-                        // TODO: error handling (too many decimal separators)
+            loop {
+                if let Some(&c) = chars.peek() {
+                    if c.is_digit(10) {
+                        num_string.push(c);
+                    } else if c == '.' {
+                        if found_decimal {
+                            // TODO: error handling (too many decimal separators)
+                        }
+                        num_string.push(c);
+                        found_decimal = true;
+                    } else {
+                        break;
                     }
-                    end += 1;
-
-                    found_decimal = true;
+                    chars.next();
                 } else {
                     break;
                 }
@@ -53,45 +60,42 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
             // if the number contained a decimal separator ('.'), then push a Token::Float
             // else, push a Token::Number
             if found_decimal {
-                let &num = &input[i..end].parse::<f64>().unwrap();
+                let &num = &num_string.parse::<f64>().unwrap();
                 output.push(Float(num));
             } else {
-                let &num = &input[i..end].parse::<f64>().unwrap();
+                let &num = &num_string.parse::<f64>().unwrap();
                 output.push(Number(num));
             }
-            i = end;
             continue;
         }
 
         // ignore whitespace. This way "1+1" and "1 + 1" are equivalent
         if c.is_whitespace() {
-            i += 1;
             continue;
         }
 
         // if c is a letter, it can either be a variable name or a function
         if c.is_alphabetic() {
-            let mut end = i + 1;
+            let mut var_string = String::new();
+            var_string.push(c);
 
-            while end < input.len() {
-                let &c = &input[end..end + 1].chars().next().unwrap();
-
-                if c.is_alphabetic() {
-                    end += 1;
+            loop {
+                if let Some(&c) = chars.peek() {
+                    if c.is_alphabetic() {
+                        var_string.push(c);
+                    } else {
+                        break;
+                    }
                 } else {
                     break;
                 }
             }
-
-            let variable = &input[i..end];
-            output.push(Variable(variable.to_string()));
-            i = end;
+            output.push(Variable(var_string));
             continue;
         }
 
         if c == '=' {
             output.push(Operator('='));
-            i += 1;
             continue;
         }
         return Err(format!("unknown character: {c}"));
@@ -142,6 +146,14 @@ mod tokenize_tests {
         let correct = vec![Variable("a".to_string()), Operator('+'), Number(1.0)];
 
         assert_eq!(result, correct);
+    }
+
+    #[test]
+    fn unknown_character() {
+        let test_str = "¦ + 1";
+        let result = tokenize(test_str);
+
+        assert!(result.is_err());
     }
 }
 
