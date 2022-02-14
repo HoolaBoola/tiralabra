@@ -88,6 +88,8 @@ impl Calculator {
         Ok(format!("{result}"))
     }
 
+    /// Calculates a postfix expression and returns a single numerical value. (Or an error if the
+    /// expression is malformed)
     fn eval_postfix(&self, input: Vec<Token>) -> Result<f64, String> {
         let mut stack = Vec::new();
         for token in input {
@@ -110,6 +112,10 @@ impl Calculator {
         }
 
         let res = stack.pop().ok_or("Too many operators")?;
+
+        if !stack.is_empty() {
+            return Err(format!("Too many numbers!"));
+        }
         Ok(res)
     }
 }
