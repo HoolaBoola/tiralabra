@@ -24,37 +24,38 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
         }
         let c = c.unwrap();
 
-        // handle case of `c` being one of '+', '/', etc.
-        if is_operator(c) {
-            output.push(Operator(c));
-            continue;
-        }
+        // if c is the minus sign, two operators in a row is ok (negative number) if the following
+        // character is a digit
+        let negative_number = if c == '-' {
+            match (output.last(), chars.peek()) {
+                (Some(Operator(_)) | None, Some('0'..='9')) => true,
+                _ => false 
+            }
+        } else {
+            false 
+        };
 
         // if `c` is a digit (0 <= c <= 9) then find out how long the number is
-        if c.is_digit(10) {
+        if c.is_digit(10) || negative_number {  
             let mut num_string = String::new();
             num_string.push(c);
             let mut found_decimal = false;
 
             // if the current number is more than one digit (e.g. 13),
             // need to loop to find the end
-            loop {
-                if let Some(&c) = chars.peek() {
-                    if c.is_digit(10) {
-                        num_string.push(c);
-                    } else if c == '.' {
-                        if found_decimal {
-                            // TODO: error handling (too many decimal separators)
-                        }
-                        num_string.push(c);
-                        found_decimal = true;
-                    } else {
-                        break;
+            while let Some(&c) = chars.peek() {
+                if c.is_digit(10) {
+                    num_string.push(c);
+                } else if c == '.' {
+                    if found_decimal {
+                        // TODO: error handling (too many decimal separators)
                     }
-                    chars.next();
+                    num_string.push(c);
+                    found_decimal = true;
                 } else {
                     break;
                 }
+                chars.next();
             }
 
             // if the number contained a decimal separator ('.'), then push a Token::Float
@@ -69,6 +70,12 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
             continue;
         }
 
+        // handle case of `c` being one of '+', '/', etc.
+        if is_operator(c) {
+            output.push(Operator(c));
+            continue;
+        }
+
         // ignore whitespace. This way "1+1" and "1 + 1" are equivalent
         if c.is_whitespace() {
             continue;
@@ -79,13 +86,9 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
             let mut var_string = String::new();
             var_string.push(c);
 
-            loop {
-                if let Some(&c) = chars.peek() {
-                    if c.is_alphabetic() {
-                        var_string.push(c);
-                    } else {
-                        break;
-                    }
+            while let Some(&c) = chars.peek() {
+                if c.is_alphabetic() {
+                    var_string.push(c);
                 } else {
                     break;
                 }
