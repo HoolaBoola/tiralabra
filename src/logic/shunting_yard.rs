@@ -150,7 +150,7 @@ mod shunting_yard_tests {
             Operator('^'),
             Number(4.0),
             Operator('*'),
-            Number(2.0)
+            Number(2.0),
         ];
 
         let res = shunting_yard(tokens).unwrap();
@@ -159,7 +159,7 @@ mod shunting_yard_tests {
             Number(4.0),
             Operator('^'),
             Number(2.0),
-            Operator('*')
+            Operator('*'),
         ];
 
         assert_eq!(res, correct);
@@ -195,12 +195,7 @@ mod shunting_yard_tests {
 
     #[test]
     fn too_many_numbers_in_a_row() {
-        let tokens = vec![
-            Number(1.0),
-            Number(2.0),
-            Operator('*'),
-            Number(100.0)
-        ];
+        let tokens = vec![Number(1.0), Number(2.0), Operator('*'), Number(100.0)];
 
         let res = shunting_yard(tokens);
 

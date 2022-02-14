@@ -27,16 +27,18 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
         // if c is the minus sign, two operators in a row is ok (negative number) if the following
         // character is a digit
         let negative_number = if c == '-' {
-            match (output.last(), chars.peek()) {
-                (Some(Operator(_)) | None, Some('0'..='9')) => true,
-                _ => false 
-            }
+            // if the previous character is an operator, or `c` is the first character of the
+            // input
+            matches!(
+                (output.last(), chars.peek()),
+                (Some(Operator(_)) | None, Some('0'..='9'))
+            )
         } else {
-            false 
+            false
         };
 
         // if `c` is a digit (0 <= c <= 9) then find out how long the number is
-        if c.is_digit(10) || negative_number {  
+        if c.is_digit(10) || negative_number {
             let mut num_string = String::new();
             num_string.push(c);
             let mut found_decimal = false;
@@ -167,7 +169,7 @@ mod is_operator_tests {
     #[test]
     fn returns_true_for_operators() {
         let operators = ['+', '-', '*', '/', '^', '(', ')'];
-        
+
         for operator in operators {
             assert!(is_operator(operator));
         }
