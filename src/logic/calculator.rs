@@ -88,6 +88,8 @@ impl Calculator {
         Ok(format!("{result}"))
     }
 
+    /// Calculates a postfix expression and returns a single numerical value. (Or an error if the
+    /// expression is malformed)
     fn eval_postfix(&self, input: Vec<Token>) -> Result<f64, String> {
         let mut stack = Vec::new();
         for token in input {
@@ -110,6 +112,10 @@ impl Calculator {
         }
 
         let res = stack.pop().ok_or("Too many operators")?;
+
+        if !stack.is_empty() {
+            return Err("Too many numbers!".to_string());
+        }
         Ok(res)
     }
 }
@@ -188,9 +194,28 @@ mod eval_postfix_tests {
     }
 
     #[test]
-    fn operator_before_numbers_gives_error() {
+    fn operator_before_numbers_returns_error() {
         let calculator = Calculator::new();
         let test_vec = vec![Operator('+'), Number(1.0), Number(2.0)];
+        let res = calculator.eval_postfix(test_vec);
+
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn too_many_operators_returns_error() {
+        let calculator = Calculator::new();
+        let test_vec = vec![Number(1.0), Number(1.0), Operator('*'), Operator('+')];
+
+        let res = calculator.eval_postfix(test_vec);
+
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn too_many_numbers_returns_error() {
+        let calculator = Calculator::new();
+        let test_vec = vec![Number(1.0), Number(1.0), Operator('/'), Number(1.0)];
         let res = calculator.eval_postfix(test_vec);
 
         assert!(res.is_err());

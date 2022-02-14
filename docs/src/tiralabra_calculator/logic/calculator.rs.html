@@ -263,6 +263,31 @@
 <span id="262">262</span>
 <span id="263">263</span>
 <span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">super</span>::shunting_yard</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::tokenize</span>;
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
@@ -353,6 +378,8 @@
         <span class="prelude-val">Ok</span>(<span class="macro">format!</span>(<span class="string">&quot;{result}&quot;</span>))
     }
 
+    <span class="doccomment">/// Calculates a postfix expression and returns a single numerical value. (Or an error if the</span>
+    <span class="doccomment">/// expression is malformed)</span>
     <span class="kw">fn</span> <span class="ident">eval_postfix</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">input</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">f64</span>, <span class="ident">String</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">stack</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
         <span class="kw">for</span> <span class="ident">token</span> <span class="kw">in</span> <span class="ident">input</span> {
@@ -375,6 +402,10 @@
         }
 
         <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">stack</span>.<span class="ident">pop</span>().<span class="ident">ok_or</span>(<span class="string">&quot;Too many operators&quot;</span>)<span class="question-mark">?</span>;
+
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">stack</span>.<span class="ident">is_empty</span>() {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Too many numbers!&quot;</span>.<span class="ident">to_string</span>());
+        }
         <span class="prelude-val">Ok</span>(<span class="ident">res</span>)
     }
 }
@@ -453,9 +484,28 @@
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">operator_before_numbers_gives_error</span>() {
+    <span class="kw">fn</span> <span class="ident">operator_before_numbers_returns_error</span>() {
         <span class="kw">let</span> <span class="ident">calculator</span> <span class="op">=</span> <span class="ident">Calculator::new</span>();
         <span class="kw">let</span> <span class="ident">test_vec</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="ident">Operator</span>(<span class="string">&#39;+&#39;</span>), <span class="ident">Number</span>(<span class="number">1.0</span>), <span class="ident">Number</span>(<span class="number">2.0</span>)];
+        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">calculator</span>.<span class="ident">eval_postfix</span>(<span class="ident">test_vec</span>);
+
+        <span class="macro">assert!</span>(<span class="ident">res</span>.<span class="ident">is_err</span>());
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">too_many_operators_returns_error</span>() {
+        <span class="kw">let</span> <span class="ident">calculator</span> <span class="op">=</span> <span class="ident">Calculator::new</span>();
+        <span class="kw">let</span> <span class="ident">test_vec</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="ident">Number</span>(<span class="number">1.0</span>), <span class="ident">Number</span>(<span class="number">1.0</span>), <span class="ident">Operator</span>(<span class="string">&#39;*&#39;</span>), <span class="ident">Operator</span>(<span class="string">&#39;+&#39;</span>)];
+
+        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">calculator</span>.<span class="ident">eval_postfix</span>(<span class="ident">test_vec</span>);
+
+        <span class="macro">assert!</span>(<span class="ident">res</span>.<span class="ident">is_err</span>());
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">too_many_numbers_returns_error</span>() {
+        <span class="kw">let</span> <span class="ident">calculator</span> <span class="op">=</span> <span class="ident">Calculator::new</span>();
+        <span class="kw">let</span> <span class="ident">test_vec</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="ident">Number</span>(<span class="number">1.0</span>), <span class="ident">Number</span>(<span class="number">1.0</span>), <span class="ident">Operator</span>(<span class="string">&#39;/&#39;</span>), <span class="ident">Number</span>(<span class="number">1.0</span>)];
         <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">calculator</span>.<span class="ident">eval_postfix</span>(<span class="ident">test_vec</span>);
 
         <span class="macro">assert!</span>(<span class="ident">res</span>.<span class="ident">is_err</span>());

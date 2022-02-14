@@ -38,6 +38,10 @@ pub fn shunting_yard(input: Vec<Token>) -> Result<Vec<Token>, &'static str> {
     let mut output = Vec::new();
     let mut operators = Vec::new();
 
+    // only one operator can occur before a number
+    // "1 + 1" is ok, "1 ++ 1" is not
+    let mut is_operator_time = false;
+
     for token in input {
         match token {
             Operator('(') => operators.push('('),
@@ -57,6 +61,10 @@ pub fn shunting_yard(input: Vec<Token>) -> Result<Vec<Token>, &'static str> {
                 }
             }
             Operator(op) => {
+                if !is_operator_time {
+                    return Err("Too many operators in a row");
+                }
+                is_operator_time = false;
                 if let Some(p1) = precedence(op) {
                     while !operators.is_empty() {
                         let last_operator = operators[operators.len() - 1];
@@ -75,7 +83,13 @@ pub fn shunting_yard(input: Vec<Token>) -> Result<Vec<Token>, &'static str> {
                     operators.push(op);
                 }
             }
-            Number(_) | Float(_) | Variable(_) => output.push(token),
+            Number(_) | Float(_) | Variable(_) => {
+                if is_operator_time {
+                    return Err("Too many numbers in a row");
+                }
+                is_operator_time = true;
+                output.push(token);
+            }
         }
     }
 
@@ -130,6 +144,28 @@ mod shunting_yard_tests {
     }
 
     #[test]
+    fn exponents_work() {
+        let tokens = vec![
+            Number(2.0),
+            Operator('^'),
+            Number(4.0),
+            Operator('*'),
+            Number(2.0)
+        ];
+
+        let res = shunting_yard(tokens).unwrap();
+        let correct = vec![
+            Number(2.0),
+            Number(4.0),
+            Operator('^'),
+            Number(2.0),
+            Operator('*')
+        ];
+
+        assert_eq!(res, correct);
+    }
+
+    #[test]
     fn mismatched_right_parenthesis_errors() {
         let tokens = vec![
             Number(1.0),
@@ -154,6 +190,20 @@ mod shunting_yard_tests {
             Number(3.0),
         ];
         let res = shunting_yard(tokens);
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn too_many_numbers_in_a_row() {
+        let tokens = vec![
+            Number(1.0),
+            Number(2.0),
+            Operator('*'),
+            Number(100.0)
+        ];
+
+        let res = shunting_yard(tokens);
+
         assert!(res.is_err());
     }
 }

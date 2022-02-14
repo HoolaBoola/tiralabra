@@ -168,6 +168,21 @@
 <span id="167">167</span>
 <span id="168">168</span>
 <span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">super</span>::calculator::Token</span>::{<span class="self">self</span>, <span class="ident">Float</span>, <span class="ident">Number</span>, <span class="ident">Operator</span>, <span class="ident">Variable</span>};
 
 <span class="doccomment">/// Tokenize a string into a `Vec` of Tokens.</span>
@@ -185,83 +200,90 @@
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">tokenize</span>(<span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">output</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="number">0</span>;
-    <span class="kw">while</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">input</span>.<span class="ident">len</span>() {
-        <span class="kw">let</span> <span class="kw-2">&amp;</span><span class="ident">c</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">input</span>[<span class="ident">i</span>..<span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>].<span class="ident">chars</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>();
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chars</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">chars</span>().<span class="ident">peekable</span>();
 
-        <span class="comment">// handle case of `c` being one of &#39;+&#39;, &#39;/&#39;, etc.</span>
-        <span class="kw">if</span> <span class="ident">is_operator</span>(<span class="ident">c</span>) {
-            <span class="ident">output</span>.<span class="ident">push</span>(<span class="ident">Operator</span>(<span class="ident">c</span>));
-            <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-            <span class="kw">continue</span>;
+    <span class="kw">loop</span> {
+        <span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">chars</span>.<span class="ident">next</span>();
+        <span class="kw">if</span> <span class="ident">c</span>.<span class="ident">is_none</span>() {
+            <span class="kw">break</span>;
         }
+        <span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">c</span>.<span class="ident">unwrap</span>();
+
+        <span class="comment">// if c is the minus sign, two operators in a row is ok (negative number) if the following</span>
+        <span class="comment">// character is a digit</span>
+        <span class="kw">let</span> <span class="ident">negative_number</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">c</span> <span class="op">==</span> <span class="string">&#39;-&#39;</span> {
+            <span class="kw">match</span> (<span class="ident">output</span>.<span class="ident">last</span>(), <span class="ident">chars</span>.<span class="ident">peek</span>()) {
+                (<span class="prelude-val">Some</span>(<span class="ident">Operator</span>(<span class="kw">_</span>)) <span class="op">|</span> <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">&#39;0&#39;</span>..<span class="op">=</span><span class="string">&#39;9&#39;</span>)) =&gt; <span class="bool-val">true</span>,
+                <span class="kw">_</span> =&gt; <span class="bool-val">false</span> 
+            }
+        } <span class="kw">else</span> {
+            <span class="bool-val">false</span> 
+        };
 
         <span class="comment">// if `c` is a digit (0 &lt;= c &lt;= 9) then find out how long the number is</span>
-        <span class="kw">if</span> <span class="ident">c</span>.<span class="ident">is_digit</span>(<span class="number">10</span>) {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">end</span> <span class="op">=</span> <span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>;
+        <span class="kw">if</span> <span class="ident">c</span>.<span class="ident">is_digit</span>(<span class="number">10</span>) <span class="op">|</span><span class="op">|</span> <span class="ident">negative_number</span> {  
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">num_string</span> <span class="op">=</span> <span class="ident">String::new</span>();
+            <span class="ident">num_string</span>.<span class="ident">push</span>(<span class="ident">c</span>);
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">found_decimal</span> <span class="op">=</span> <span class="bool-val">false</span>;
 
             <span class="comment">// if the current number is more than one digit (e.g. 13),</span>
             <span class="comment">// need to loop to find the end</span>
-            <span class="kw">while</span> <span class="ident">end</span> <span class="op">&lt;</span> <span class="ident">input</span>.<span class="ident">len</span>() {
-                <span class="kw">let</span> <span class="kw-2">&amp;</span><span class="ident">c</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">input</span>[<span class="ident">end</span>..<span class="ident">end</span> <span class="op">+</span> <span class="number">1</span>].<span class="ident">chars</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>();
-
+            <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>) <span class="op">=</span> <span class="ident">chars</span>.<span class="ident">peek</span>() {
                 <span class="kw">if</span> <span class="ident">c</span>.<span class="ident">is_digit</span>(<span class="number">10</span>) {
-                    <span class="ident">end</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+                    <span class="ident">num_string</span>.<span class="ident">push</span>(<span class="ident">c</span>);
                 } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">c</span> <span class="op">==</span> <span class="string">&#39;.&#39;</span> {
                     <span class="kw">if</span> <span class="ident">found_decimal</span> {
                         <span class="comment">// TODO: error handling (too many decimal separators)</span>
                     }
-                    <span class="ident">end</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-
+                    <span class="ident">num_string</span>.<span class="ident">push</span>(<span class="ident">c</span>);
                     <span class="ident">found_decimal</span> <span class="op">=</span> <span class="bool-val">true</span>;
                 } <span class="kw">else</span> {
                     <span class="kw">break</span>;
                 }
+                <span class="ident">chars</span>.<span class="ident">next</span>();
             }
 
             <span class="comment">// if the number contained a decimal separator (&#39;.&#39;), then push a Token::Float</span>
             <span class="comment">// else, push a Token::Number</span>
             <span class="kw">if</span> <span class="ident">found_decimal</span> {
-                <span class="kw">let</span> <span class="kw-2">&amp;</span><span class="ident">num</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">input</span>[<span class="ident">i</span>..<span class="ident">end</span>].<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>();
+                <span class="kw">let</span> <span class="kw-2">&amp;</span><span class="ident">num</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">num_string</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>();
                 <span class="ident">output</span>.<span class="ident">push</span>(<span class="ident">Float</span>(<span class="ident">num</span>));
             } <span class="kw">else</span> {
-                <span class="kw">let</span> <span class="kw-2">&amp;</span><span class="ident">num</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">input</span>[<span class="ident">i</span>..<span class="ident">end</span>].<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>();
+                <span class="kw">let</span> <span class="kw-2">&amp;</span><span class="ident">num</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">num_string</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>();
                 <span class="ident">output</span>.<span class="ident">push</span>(<span class="ident">Number</span>(<span class="ident">num</span>));
             }
-            <span class="ident">i</span> <span class="op">=</span> <span class="ident">end</span>;
+            <span class="kw">continue</span>;
+        }
+
+        <span class="comment">// handle case of `c` being one of &#39;+&#39;, &#39;/&#39;, etc.</span>
+        <span class="kw">if</span> <span class="ident">is_operator</span>(<span class="ident">c</span>) {
+            <span class="ident">output</span>.<span class="ident">push</span>(<span class="ident">Operator</span>(<span class="ident">c</span>));
             <span class="kw">continue</span>;
         }
 
         <span class="comment">// ignore whitespace. This way &quot;1+1&quot; and &quot;1 + 1&quot; are equivalent</span>
         <span class="kw">if</span> <span class="ident">c</span>.<span class="ident">is_whitespace</span>() {
-            <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
             <span class="kw">continue</span>;
         }
 
         <span class="comment">// if c is a letter, it can either be a variable name or a function</span>
         <span class="kw">if</span> <span class="ident">c</span>.<span class="ident">is_alphabetic</span>() {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">end</span> <span class="op">=</span> <span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>;
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">var_string</span> <span class="op">=</span> <span class="ident">String::new</span>();
+            <span class="ident">var_string</span>.<span class="ident">push</span>(<span class="ident">c</span>);
 
-            <span class="kw">while</span> <span class="ident">end</span> <span class="op">&lt;</span> <span class="ident">input</span>.<span class="ident">len</span>() {
-                <span class="kw">let</span> <span class="kw-2">&amp;</span><span class="ident">c</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">input</span>[<span class="ident">end</span>..<span class="ident">end</span> <span class="op">+</span> <span class="number">1</span>].<span class="ident">chars</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>();
-
+            <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>) <span class="op">=</span> <span class="ident">chars</span>.<span class="ident">peek</span>() {
                 <span class="kw">if</span> <span class="ident">c</span>.<span class="ident">is_alphabetic</span>() {
-                    <span class="ident">end</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+                    <span class="ident">var_string</span>.<span class="ident">push</span>(<span class="ident">c</span>);
                 } <span class="kw">else</span> {
                     <span class="kw">break</span>;
                 }
             }
-
-            <span class="kw">let</span> <span class="ident">variable</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">input</span>[<span class="ident">i</span>..<span class="ident">end</span>];
-            <span class="ident">output</span>.<span class="ident">push</span>(<span class="ident">Variable</span>(<span class="ident">variable</span>.<span class="ident">to_string</span>()));
-            <span class="ident">i</span> <span class="op">=</span> <span class="ident">end</span>;
+            <span class="ident">output</span>.<span class="ident">push</span>(<span class="ident">Variable</span>(<span class="ident">var_string</span>));
             <span class="kw">continue</span>;
         }
 
         <span class="kw">if</span> <span class="ident">c</span> <span class="op">==</span> <span class="string">&#39;=&#39;</span> {
             <span class="ident">output</span>.<span class="ident">push</span>(<span class="ident">Operator</span>(<span class="string">&#39;=&#39;</span>));
-            <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
             <span class="kw">continue</span>;
         }
         <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;unknown character: {c}&quot;</span>));
@@ -312,6 +334,14 @@
         <span class="kw">let</span> <span class="ident">correct</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="ident">Variable</span>(<span class="string">&quot;a&quot;</span>.<span class="ident">to_string</span>()), <span class="ident">Operator</span>(<span class="string">&#39;+&#39;</span>), <span class="ident">Number</span>(<span class="number">1.0</span>)];
 
         <span class="macro">assert_eq!</span>(<span class="ident">result</span>, <span class="ident">correct</span>);
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">unknown_character</span>() {
+        <span class="kw">let</span> <span class="ident">test_str</span> <span class="op">=</span> <span class="string">&quot;¦ + 1&quot;</span>;
+        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">tokenize</span>(<span class="ident">test_str</span>);
+
+        <span class="macro">assert!</span>(<span class="ident">result</span>.<span class="ident">is_err</span>());
     }
 }
 
