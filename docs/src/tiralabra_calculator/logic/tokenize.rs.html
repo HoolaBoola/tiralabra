@@ -183,6 +183,8 @@
 <span id="182">182</span>
 <span id="183">183</span>
 <span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">super</span>::calculator::Token</span>::{<span class="self">self</span>, <span class="ident">Float</span>, <span class="ident">Number</span>, <span class="ident">Operator</span>, <span class="ident">Variable</span>};
 
 <span class="doccomment">/// Tokenize a string into a `Vec` of Tokens.</span>
@@ -212,16 +214,18 @@
         <span class="comment">// if c is the minus sign, two operators in a row is ok (negative number) if the following</span>
         <span class="comment">// character is a digit</span>
         <span class="kw">let</span> <span class="ident">negative_number</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">c</span> <span class="op">==</span> <span class="string">&#39;-&#39;</span> {
-            <span class="kw">match</span> (<span class="ident">output</span>.<span class="ident">last</span>(), <span class="ident">chars</span>.<span class="ident">peek</span>()) {
-                (<span class="prelude-val">Some</span>(<span class="ident">Operator</span>(<span class="kw">_</span>)) <span class="op">|</span> <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">&#39;0&#39;</span>..<span class="op">=</span><span class="string">&#39;9&#39;</span>)) =&gt; <span class="bool-val">true</span>,
-                <span class="kw">_</span> =&gt; <span class="bool-val">false</span> 
-            }
+            <span class="comment">// if the previous character is an operator, or `c` is the first character of the</span>
+            <span class="comment">// input</span>
+            <span class="macro">matches!</span>(
+                (<span class="ident">output</span>.<span class="ident">last</span>(), <span class="ident">chars</span>.<span class="ident">peek</span>()),
+                (<span class="prelude-val">Some</span>(<span class="ident">Operator</span>(<span class="kw">_</span>)) <span class="op">|</span> <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="string">&#39;0&#39;</span>..<span class="op">=</span><span class="string">&#39;9&#39;</span>))
+            )
         } <span class="kw">else</span> {
-            <span class="bool-val">false</span> 
+            <span class="bool-val">false</span>
         };
 
         <span class="comment">// if `c` is a digit (0 &lt;= c &lt;= 9) then find out how long the number is</span>
-        <span class="kw">if</span> <span class="ident">c</span>.<span class="ident">is_digit</span>(<span class="number">10</span>) <span class="op">|</span><span class="op">|</span> <span class="ident">negative_number</span> {  
+        <span class="kw">if</span> <span class="ident">c</span>.<span class="ident">is_digit</span>(<span class="number">10</span>) <span class="op">|</span><span class="op">|</span> <span class="ident">negative_number</span> {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">num_string</span> <span class="op">=</span> <span class="ident">String::new</span>();
             <span class="ident">num_string</span>.<span class="ident">push</span>(<span class="ident">c</span>);
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">found_decimal</span> <span class="op">=</span> <span class="bool-val">false</span>;
@@ -352,7 +356,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">returns_true_for_operators</span>() {
         <span class="kw">let</span> <span class="ident">operators</span> <span class="op">=</span> [<span class="string">&#39;+&#39;</span>, <span class="string">&#39;-&#39;</span>, <span class="string">&#39;*&#39;</span>, <span class="string">&#39;/&#39;</span>, <span class="string">&#39;^&#39;</span>, <span class="string">&#39;(&#39;</span>, <span class="string">&#39;)&#39;</span>];
-        
+
         <span class="kw">for</span> <span class="ident">operator</span> <span class="kw">in</span> <span class="ident">operators</span> {
             <span class="macro">assert!</span>(<span class="ident">is_operator</span>(<span class="ident">operator</span>));
         }
