@@ -42,6 +42,7 @@ impl Calculator {
     /// Enter a string with an infix expression (example: "2 * (2 + 1)") as parameter.
     /// Returns a result containing the evaluated result of the expression, or an error
     pub fn calculate_infix(&mut self, input: &str) -> Result<String, String> {
+
         self.history.push(input.to_string());
         let mut eq_position = None;
 
