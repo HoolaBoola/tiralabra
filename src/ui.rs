@@ -4,20 +4,13 @@ use rustyline::Editor;
 
 /// The main REPL for the calculator. 
 ///
-/// Input length in many terminal emulators is limited to 4096 characters, and anything
-/// longer will be automatically trimmed.
-///
-/// See https://web.archive.org/web/20170315162529/http://blog.chaitanya.im/4096-limit
-///
-/// I'm unsure whether it's fixable easily.
-///
 pub fn main_loop() -> Result<(), std::io::Error> {
     let mut calculator = Calculator::new();
     
     let mut rl = Editor::<()>::new();
 
-    println!("To exit, enter ?quit");
     let control_key = "?";
+    println!("To exit, enter {control_key}quit");
 
     loop {
         let readline = rl.readline(">> ");
@@ -28,15 +21,15 @@ pub fn main_loop() -> Result<(), std::io::Error> {
             },
             Err(ReadlineError::Interrupted) => {
                 println!("CTRL-C, quitting...");
-                break
+                break;
             },
             Err(ReadlineError::Eof) => {
                 println!("CTRL-D, quitting...");
-                break
+                break;
             },
             Err(err) => {
                 println!("Error: {:?}", err);
-                break
+                break;
             }
         };
 
