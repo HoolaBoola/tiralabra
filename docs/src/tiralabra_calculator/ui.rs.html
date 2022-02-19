@@ -46,33 +46,19 @@
 <span id="45">45</span>
 <span id="46">46</span>
 <span id="47">47</span>
-<span id="48">48</span>
-<span id="49">49</span>
-<span id="50">50</span>
-<span id="51">51</span>
-<span id="52">52</span>
-<span id="53">53</span>
-<span id="54">54</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::logic::Calculator</span>;
 <span class="kw">use</span> <span class="ident">rustyline::error::ReadlineError</span>;
 <span class="kw">use</span> <span class="ident">rustyline::Editor</span>;
 
 <span class="doccomment">/// The main REPL for the calculator. </span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// Input length in many terminal emulators is limited to 4096 characters, and anything</span>
-<span class="doccomment">/// longer will be automatically trimmed.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// See https://web.archive.org/web/20170315162529/http://blog.chaitanya.im/4096-limit</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// I&#39;m unsure whether it&#39;s fixable easily.</span>
-<span class="doccomment">///</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">main_loop</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">std::io::Error</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">calculator</span> <span class="op">=</span> <span class="ident">Calculator::new</span>();
     
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rl</span> <span class="op">=</span> <span class="ident">Editor</span>::<span class="op">&lt;</span>()<span class="op">&gt;</span><span class="ident">::new</span>();
 
-    <span class="macro">println!</span>(<span class="string">&quot;To exit, enter ?quit&quot;</span>);
     <span class="kw">let</span> <span class="ident">control_key</span> <span class="op">=</span> <span class="string">&quot;?&quot;</span>;
+    <span class="macro">println!</span>(<span class="string">&quot;To exit, enter {control_key}quit&quot;</span>);
 
     <span class="kw">loop</span> {
         <span class="kw">let</span> <span class="ident">readline</span> <span class="op">=</span> <span class="ident">rl</span>.<span class="ident">readline</span>(<span class="string">&quot;&gt;&gt; &quot;</span>);
@@ -83,15 +69,15 @@
             },
             <span class="prelude-val">Err</span>(<span class="ident">ReadlineError::Interrupted</span>) =&gt; {
                 <span class="macro">println!</span>(<span class="string">&quot;CTRL-C, quitting...&quot;</span>);
-                <span class="kw">break</span>
+                <span class="kw">break</span>;
             },
             <span class="prelude-val">Err</span>(<span class="ident">ReadlineError::Eof</span>) =&gt; {
                 <span class="macro">println!</span>(<span class="string">&quot;CTRL-D, quitting...&quot;</span>);
-                <span class="kw">break</span>
+                <span class="kw">break</span>;
             },
             <span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; {
                 <span class="macro">println!</span>(<span class="string">&quot;Error: {:?}&quot;</span>, <span class="ident">err</span>);
-                <span class="kw">break</span>
+                <span class="kw">break</span>;
             }
         };
 

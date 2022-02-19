@@ -21,10 +21,10 @@ Syötä ohjelmalle matemaattisia lausekkeita (esim. `(1 + 2) * 3`) ja ohjelma la
 Luo muuttujia kirjoittamalla muuttujan nimi (esim. "a") ja yhtäsuuruusmerkki "=" ennen lauseketta. Tätä muuttujaa voi käyttää myöhemmissä lausekkeissa normaalin luvun tavoin.
 
 ```
-> a = (1 + 2) * 3
-9
-> a + 1
-10
+>> a = (1 + 2) * 3
+ 9
+>> a + 1
+ 10
 ```
 
 Ohjelmasta voi poistua syöttämällä komennon `?quit`.
