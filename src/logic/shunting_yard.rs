@@ -34,7 +34,7 @@ fn precedence(c: char) -> Option<u8> {
 /// let res = shunting_yard(tokens).unwrap();
 /// // -> [Number(1.0), Number(2.0), Number(4.0), Operator('*'), Operator('+')]
 /// ```
-pub fn shunting_yard(input: Vec<Token>) -> Result<Vec<Token>, &'static str> {
+pub fn shunting_yard(input: Vec<Token>) -> Result<Vec<Token>, String> {
     let mut output = Vec::new();
     let mut operators = Vec::new();
 
@@ -57,12 +57,12 @@ pub fn shunting_yard(input: Vec<Token>) -> Result<Vec<Token>, &'static str> {
                 }
 
                 if !found {
-                    return Err("Right parenthesis without a pair found");
+                    return Err("Right parenthesis without a pair found".to_string());
                 }
             }
             Operator(op) => {
                 if !is_operator_time {
-                    return Err("Too many operators in a row");
+                    return Err(format!("Unexpected operator: {op}"));
                 }
                 is_operator_time = false;
                 if let Some(p1) = precedence(op) {
@@ -85,7 +85,7 @@ pub fn shunting_yard(input: Vec<Token>) -> Result<Vec<Token>, &'static str> {
             }
             Number(_) | Float(_) | Variable(_) => {
                 if is_operator_time {
-                    return Err("Too many numbers in a row");
+                    return Err("Too many numbers in a row".to_string());
                 }
                 is_operator_time = true;
                 output.push(token);
@@ -95,7 +95,7 @@ pub fn shunting_yard(input: Vec<Token>) -> Result<Vec<Token>, &'static str> {
 
     while let Some(op) = operators.pop() {
         if op == '(' {
-            return Err("Left parenthesis without a pair found");
+            return Err("Left parenthesis without a pair found".to_string());
         }
         output.push(Operator(op));
     }

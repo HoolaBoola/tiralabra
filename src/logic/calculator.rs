@@ -27,14 +27,12 @@ use Token::*;
 /// ```
 ///
 pub struct Calculator {
-    history: Vec<String>,
     variables: HashMap<String, f64>,
 }
 
 impl Calculator {
     pub fn new() -> Calculator {
         Calculator {
-            history: Vec::new(),
             variables: HashMap::new(),
         }
     }
@@ -42,7 +40,7 @@ impl Calculator {
     /// Enter a string with an infix expression (example: "2 * (2 + 1)") as parameter.
     /// Returns a result containing the evaluated result of the expression, or an error
     pub fn calculate_infix(&mut self, input: &str) -> Result<String, String> {
-        self.history.push(input.to_string());
+
         let mut eq_position = None;
 
         // find the position of the '=' character, if it exists

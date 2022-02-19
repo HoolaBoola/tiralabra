@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["main_loop",""]]});
+initSidebarItems({"fn":[["main_loop","The main REPL for the calculator. "]]});

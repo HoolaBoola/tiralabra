@@ -94,6 +94,7 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
                 } else {
                     break;
                 }
+                chars.next();
             }
             output.push(Variable(var_string));
             continue;
@@ -151,6 +152,14 @@ mod tokenize_tests {
         let correct = vec![Variable("a".to_string()), Operator('+'), Number(1.0)];
 
         assert_eq!(result, correct);
+    }
+
+    #[test]
+    fn multi_letter_variables() {
+        let test_str = "abcdefg";
+        let result = tokenize(test_str).unwrap();
+        
+        assert_eq!(result[0], Variable(test_str.to_string()));
     }
 
     #[test]

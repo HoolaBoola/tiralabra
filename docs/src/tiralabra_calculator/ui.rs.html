@@ -28,32 +28,82 @@
 <span id="27">27</span>
 <span id="28">28</span>
 <span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::logic::Calculator</span>;
-<span class="kw">use</span> <span class="ident">std::io</span>::{<span class="ident">stdin</span>, <span class="ident">stdout</span>, <span class="ident">Write</span>};
+<span class="kw">use</span> <span class="ident">rustyline::error::ReadlineError</span>;
+<span class="kw">use</span> <span class="ident">rustyline::Editor</span>;
 
+<span class="doccomment">/// The main REPL for the calculator. </span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Input length in many terminal emulators is limited to 4096 characters, and anything</span>
+<span class="doccomment">/// longer will be automatically trimmed.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// See https://web.archive.org/web/20170315162529/http://blog.chaitanya.im/4096-limit</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// I&#39;m unsure whether it&#39;s fixable easily.</span>
+<span class="doccomment">///</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">main_loop</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">std::io::Error</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">calculator</span> <span class="op">=</span> <span class="ident">Calculator::new</span>();
+    
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rl</span> <span class="op">=</span> <span class="ident">Editor</span>::<span class="op">&lt;</span>()<span class="op">&gt;</span><span class="ident">::new</span>();
 
+    <span class="macro">println!</span>(<span class="string">&quot;To exit, enter ?quit&quot;</span>);
     <span class="kw">let</span> <span class="ident">control_key</span> <span class="op">=</span> <span class="string">&quot;?&quot;</span>;
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">input</span> <span class="op">=</span> <span class="ident">String::new</span>();
     <span class="kw">loop</span> {
-        <span class="macro">print!</span>(<span class="string">&quot;&gt; &quot;</span>);
-
-        <span class="comment">// &quot;&gt; &quot; won&#39;t appear without flushing</span>
-        <span class="ident">stdout</span>().<span class="ident">flush</span>()<span class="question-mark">?</span>;
-        <span class="ident">stdin</span>().<span class="ident">read_line</span>(<span class="kw-2">&amp;mut</span> <span class="ident">input</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">readline</span> <span class="op">=</span> <span class="ident">rl</span>.<span class="ident">readline</span>(<span class="string">&quot;&gt;&gt; &quot;</span>);
+        <span class="kw">let</span> <span class="ident">input</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">readline</span> {
+            <span class="prelude-val">Ok</span>(<span class="ident">line</span>) =&gt; {
+                <span class="ident">rl</span>.<span class="ident">add_history_entry</span>(<span class="ident">line</span>.<span class="ident">as_str</span>());
+                <span class="ident">line</span>
+            },
+            <span class="prelude-val">Err</span>(<span class="ident">ReadlineError::Interrupted</span>) =&gt; {
+                <span class="macro">println!</span>(<span class="string">&quot;CTRL-C, quitting...&quot;</span>);
+                <span class="kw">break</span>
+            },
+            <span class="prelude-val">Err</span>(<span class="ident">ReadlineError::Eof</span>) =&gt; {
+                <span class="macro">println!</span>(<span class="string">&quot;CTRL-D, quitting...&quot;</span>);
+                <span class="kw">break</span>
+            },
+            <span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; {
+                <span class="macro">println!</span>(<span class="string">&quot;Error: {:?}&quot;</span>, <span class="ident">err</span>);
+                <span class="kw">break</span>
+            }
+        };
 
         <span class="kw">if</span> <span class="ident">input</span>.<span class="ident">starts_with</span>(<span class="ident">control_key</span>) {
             <span class="kw">break</span>;
         }
 
-        <span class="kw">match</span> <span class="ident">calculator</span>.<span class="ident">calculate_infix</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>) {
-            <span class="prelude-val">Ok</span>(<span class="ident">result</span>) =&gt; <span class="macro">println!</span>(<span class="string">&quot;{result}&quot;</span>),
+        <span class="kw">match</span> <span class="ident">calculator</span>.<span class="ident">calculate_infix</span>(<span class="ident">input</span>.<span class="ident">trim</span>()) {
+            <span class="prelude-val">Ok</span>(<span class="ident">result</span>) =&gt; <span class="macro">println!</span>(<span class="string">&quot; {result}&quot;</span>),
             <span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; <span class="macro">eprintln!</span>(<span class="string">&quot;Error:\n{err}&quot;</span>),
         }
 
-        <span class="ident">input</span>.<span class="ident">clear</span>();
     }
     <span class="prelude-val">Ok</span>(())
 }
