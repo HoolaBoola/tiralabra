@@ -303,6 +303,20 @@
 <span id="302">302</span>
 <span id="303">303</span>
 <span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">super</span>::shunting_yard</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::tokenize</span>;
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
@@ -428,6 +442,20 @@
     }
 }
 
+<span class="doccomment">/// Operate on the argument values depending on the `c` character.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The first argument, `a`, is the one the operation is applied to,</span>
+<span class="doccomment">/// for example </span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// operate(8.0, 2.0, &#39;/&#39;)</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// divides 8.0 by 2.0, not the other way.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// If either `a` or `b` is NaN or inf, return an error (because it&#39;s not obvious how the</span>
+<span class="doccomment">/// application should behave in those cases)</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// If dividing by zero or trying to use an unrecognized operator, an error is also returned.</span>
+<span class="doccomment">///</span>
 <span class="kw">fn</span> <span class="ident">operate</span>(<span class="ident">a</span>: <span class="ident">f64</span>, <span class="ident">b</span>: <span class="ident">f64</span>, <span class="ident">c</span>: <span class="ident">char</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">f64</span>, <span class="ident">String</span><span class="op">&gt;</span> {
 
     <span class="comment">// neither a or b should ever be NaN or infinite (should be caught beforehand), </span>

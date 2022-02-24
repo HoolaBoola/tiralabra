@@ -515,7 +515,7 @@
                 9
             </div>
             <div class="column has-background-success-light p-0">
-                <pre class="has-background-success-light py-0 px-2">pub fn shunting_yard(input: Vec&lt;Token&gt;) -&gt; Result&lt;Vec&lt;Token&gt;, &amp;&#x27;static str&gt; {</pre>
+                <pre class="has-background-success-light py-0 px-2">pub fn shunting_yard(input: Vec&lt;Token&gt;) -&gt; Result&lt;Vec&lt;Token&gt;, String&gt; {</pre>
             </div>
         </div><div class="columns p-0 m-0">
             <div
@@ -814,7 +814,7 @@
                 1
             </div>
             <div class="column has-background-success-light p-0">
-                <pre class="has-background-success-light py-0 px-2">                    return Err(&quot;Right parenthesis without a pair found&quot;);</pre>
+                <pre class="has-background-success-light py-0 px-2">                    return Err(&quot;Right parenthesis without a pair found&quot;.to_string());</pre>
             </div>
         </div><div class="columns p-0 m-0">
             <div
@@ -879,7 +879,7 @@
                 1
             </div>
             <div class="column has-background-success-light p-0">
-                <pre class="has-background-success-light py-0 px-2">                    return Err(&quot;Too many operators in a row&quot;);</pre>
+                <pre class="has-background-success-light py-0 px-2">                    return Err(format!(&quot;Unexpected operator: {op}&quot;));</pre>
             </div>
         </div><div class="columns p-0 m-0">
             <div
@@ -1178,7 +1178,7 @@
                 1
             </div>
             <div class="column has-background-success-light p-0">
-                <pre class="has-background-success-light py-0 px-2">                    return Err(&quot;Too many numbers in a row&quot;);</pre>
+                <pre class="has-background-success-light py-0 px-2">                    return Err(&quot;Too many numbers in a row&quot;.to_string());</pre>
             </div>
         </div><div class="columns p-0 m-0">
             <div
@@ -1308,7 +1308,7 @@
                 1
             </div>
             <div class="column has-background-success-light p-0">
-                <pre class="has-background-success-light py-0 px-2">            return Err(&quot;Left parenthesis without a pair found&quot;);</pre>
+                <pre class="has-background-success-light py-0 px-2">            return Err(&quot;Left parenthesis without a pair found&quot;.to_string());</pre>
             </div>
         </div><div class="columns p-0 m-0">
             <div
@@ -2691,7 +2691,7 @@
         </div></div>
         <footer class="footer">
             <div class="content has-text-centered">
-                <p class="heading">Date: 2022-02-17 01:19</p>
+                <p class="heading">Date: 2022-02-24 19:03</p>
             </div>
         </footer>
     </body>
