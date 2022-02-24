@@ -97,7 +97,12 @@ impl Calculator {
                 Operator(op) => {
                     let a = stack.pop().ok_or("Too many operators")?;
                     let b = stack.pop().ok_or("Too many operators")?;
-                    stack.push(operate(b, a, op))
+                    match operate(b, a, op) {
+                        Ok(result) => stack.push(result),
+                        err_msg @ Err(_) => return err_msg
+                    };
+
+
                 }
                 Variable(var) => {
                     if let Some(&val) = self.variables.get(&var) {
@@ -118,20 +123,32 @@ impl Calculator {
     }
 }
 
-fn operate(a: f64, b: f64, c: char) -> f64 {
+fn operate(a: f64, b: f64, c: char) -> Result<f64, String> {
+
+    // neither a or b should ever be NaN or infinite (should be caught beforehand), 
+    // but in case it happens anyway, return an error
+    if a.is_nan() || b.is_nan() {
+        return Err("At least one argument is not a number (NaN)".to_string())
+    }
+    if a.is_infinite() || b.is_infinite() {
+        return Err("At least one argument is infinite".to_string());
+    }
+
     match c {
-        '+' => a + b,
-        '-' => a - b,
-        '*' => a * b,
+        '+' => Ok(a + b),
+        '-' => Ok(a - b),
+        '*' => Ok(a * b),
         '/' => {
             if b != 0.0 {
-                a / b
+                Ok(a / b)
             } else {
-                f64::NAN
+                Err("Trying to divide by zero!".to_string())
             }
         }
-        '^' => a.powf(b),
-        _ => 0.0,
+        '^' => Ok(a.powf(b)),
+        // should not be reached ever, but in case of error elsewhere,
+        // this branch will catch it
+        _ => Err(format!("Unrecognized operator: {c}")),
     }
 }
 
@@ -228,42 +245,42 @@ mod operate_tests {
     fn one_plus_one_is_two() {
         let res = operate(1.0, 1.0, '+');
 
-        assert_eq!(res, 2.0);
+        assert_eq!(res.unwrap(), 2.0);
     }
 
     #[test]
     fn two_times_four_is_eight() {
         let res = operate(2.0, 4.0, '*');
 
-        assert_eq!(res, 8.0);
+        assert_eq!(res.unwrap(), 8.0);
     }
 
     #[test]
     fn four_div_eight_is_half() {
         let res = operate(4.0, 8.0, '/');
 
-        assert_eq!(res, 0.5);
+        assert_eq!(res.unwrap(), 0.5);
     }
 
     #[test]
     fn one_minus_two_is_minus_one() {
         let res = operate(1.0, 2.0, '-');
 
-        assert_eq!(res, -1.0);
+        assert_eq!(res.unwrap(), -1.0);
     }
 
     #[test]
-    fn unknown_operator_returns_zero() {
+    fn unknown_operator_returns_err() {
         let res = operate(1.0, 10.0, '?');
 
-        assert_eq!(res, 0.0);
+        assert!(res.is_err());
     }
 
     #[test]
     fn divide_by_zero_returns_nan() {
         let res = operate(1.0, 0.0, '/');
 
-        assert!(res.is_nan());
+        assert!(res.is_err());
     }
 }
 

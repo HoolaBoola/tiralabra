@@ -286,6 +286,23 @@
 <span id="285">285</span>
 <span id="286">286</span>
 <span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">super</span>::shunting_yard</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::tokenize</span>;
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
@@ -385,7 +402,12 @@
                 <span class="ident">Operator</span>(<span class="ident">op</span>) =&gt; {
                     <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">stack</span>.<span class="ident">pop</span>().<span class="ident">ok_or</span>(<span class="string">&quot;Too many operators&quot;</span>)<span class="question-mark">?</span>;
                     <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">stack</span>.<span class="ident">pop</span>().<span class="ident">ok_or</span>(<span class="string">&quot;Too many operators&quot;</span>)<span class="question-mark">?</span>;
-                    <span class="ident">stack</span>.<span class="ident">push</span>(<span class="ident">operate</span>(<span class="ident">b</span>, <span class="ident">a</span>, <span class="ident">op</span>))
+                    <span class="kw">match</span> <span class="ident">operate</span>(<span class="ident">b</span>, <span class="ident">a</span>, <span class="ident">op</span>) {
+                        <span class="prelude-val">Ok</span>(<span class="ident">result</span>) =&gt; <span class="ident">stack</span>.<span class="ident">push</span>(<span class="ident">result</span>),
+                        <span class="ident">err_msg</span> @ <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="ident">err_msg</span>
+                    };
+
+
                 }
                 <span class="ident">Variable</span>(<span class="ident">var</span>) =&gt; {
                     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">val</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">variables</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">var</span>) {
@@ -406,20 +428,32 @@
     }
 }
 
-<span class="kw">fn</span> <span class="ident">operate</span>(<span class="ident">a</span>: <span class="ident">f64</span>, <span class="ident">b</span>: <span class="ident">f64</span>, <span class="ident">c</span>: <span class="ident">char</span>) -&gt; <span class="ident">f64</span> {
+<span class="kw">fn</span> <span class="ident">operate</span>(<span class="ident">a</span>: <span class="ident">f64</span>, <span class="ident">b</span>: <span class="ident">f64</span>, <span class="ident">c</span>: <span class="ident">char</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">f64</span>, <span class="ident">String</span><span class="op">&gt;</span> {
+
+    <span class="comment">// neither a or b should ever be NaN or infinite (should be caught beforehand), </span>
+    <span class="comment">// but in case it happens anyway, return an error</span>
+    <span class="kw">if</span> <span class="ident">a</span>.<span class="ident">is_nan</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">b</span>.<span class="ident">is_nan</span>() {
+        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;At least one argument is not a number (NaN)&quot;</span>.<span class="ident">to_string</span>())
+    }
+    <span class="kw">if</span> <span class="ident">a</span>.<span class="ident">is_infinite</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">b</span>.<span class="ident">is_infinite</span>() {
+        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;At least one argument is infinite&quot;</span>.<span class="ident">to_string</span>());
+    }
+
     <span class="kw">match</span> <span class="ident">c</span> {
-        <span class="string">&#39;+&#39;</span> =&gt; <span class="ident">a</span> <span class="op">+</span> <span class="ident">b</span>,
-        <span class="string">&#39;-&#39;</span> =&gt; <span class="ident">a</span> <span class="op">-</span> <span class="ident">b</span>,
-        <span class="string">&#39;*&#39;</span> =&gt; <span class="ident">a</span> <span class="op">*</span> <span class="ident">b</span>,
+        <span class="string">&#39;+&#39;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">a</span> <span class="op">+</span> <span class="ident">b</span>),
+        <span class="string">&#39;-&#39;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">a</span> <span class="op">-</span> <span class="ident">b</span>),
+        <span class="string">&#39;*&#39;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">a</span> <span class="op">*</span> <span class="ident">b</span>),
         <span class="string">&#39;/&#39;</span> =&gt; {
             <span class="kw">if</span> <span class="ident">b</span> <span class="op">!</span><span class="op">=</span> <span class="number">0.0</span> {
-                <span class="ident">a</span> <span class="op">/</span> <span class="ident">b</span>
+                <span class="prelude-val">Ok</span>(<span class="ident">a</span> <span class="op">/</span> <span class="ident">b</span>)
             } <span class="kw">else</span> {
-                <span class="ident">f64::NAN</span>
+                <span class="prelude-val">Err</span>(<span class="string">&quot;Trying to divide by zero!&quot;</span>.<span class="ident">to_string</span>())
             }
         }
-        <span class="string">&#39;^&#39;</span> =&gt; <span class="ident">a</span>.<span class="ident">powf</span>(<span class="ident">b</span>),
-        <span class="kw">_</span> =&gt; <span class="number">0.0</span>,
+        <span class="string">&#39;^&#39;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">a</span>.<span class="ident">powf</span>(<span class="ident">b</span>)),
+        <span class="comment">// should not be reached ever, but in case of error elsewhere,</span>
+        <span class="comment">// this branch will catch it</span>
+        <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Unrecognized operator: {c}&quot;</span>)),
     }
 }
 
@@ -516,42 +550,42 @@
     <span class="kw">fn</span> <span class="ident">one_plus_one_is_two</span>() {
         <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">operate</span>(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="string">&#39;+&#39;</span>);
 
-        <span class="macro">assert_eq!</span>(<span class="ident">res</span>, <span class="number">2.0</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">res</span>.<span class="ident">unwrap</span>(), <span class="number">2.0</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">two_times_four_is_eight</span>() {
         <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">operate</span>(<span class="number">2.0</span>, <span class="number">4.0</span>, <span class="string">&#39;*&#39;</span>);
 
-        <span class="macro">assert_eq!</span>(<span class="ident">res</span>, <span class="number">8.0</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">res</span>.<span class="ident">unwrap</span>(), <span class="number">8.0</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">four_div_eight_is_half</span>() {
         <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">operate</span>(<span class="number">4.0</span>, <span class="number">8.0</span>, <span class="string">&#39;/&#39;</span>);
 
-        <span class="macro">assert_eq!</span>(<span class="ident">res</span>, <span class="number">0.5</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">res</span>.<span class="ident">unwrap</span>(), <span class="number">0.5</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">one_minus_two_is_minus_one</span>() {
         <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">operate</span>(<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="string">&#39;-&#39;</span>);
 
-        <span class="macro">assert_eq!</span>(<span class="ident">res</span>, <span class="op">-</span><span class="number">1.0</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">res</span>.<span class="ident">unwrap</span>(), <span class="op">-</span><span class="number">1.0</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">unknown_operator_returns_zero</span>() {
+    <span class="kw">fn</span> <span class="ident">unknown_operator_returns_err</span>() {
         <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">operate</span>(<span class="number">1.0</span>, <span class="number">10.0</span>, <span class="string">&#39;?&#39;</span>);
 
-        <span class="macro">assert_eq!</span>(<span class="ident">res</span>, <span class="number">0.0</span>);
+        <span class="macro">assert!</span>(<span class="ident">res</span>.<span class="ident">is_err</span>());
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">divide_by_zero_returns_nan</span>() {
         <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">operate</span>(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="string">&#39;/&#39;</span>);
 
-        <span class="macro">assert!</span>(<span class="ident">res</span>.<span class="ident">is_nan</span>());
+        <span class="macro">assert!</span>(<span class="ident">res</span>.<span class="ident">is_err</span>());
     }
 }
 
