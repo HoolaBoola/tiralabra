@@ -123,6 +123,20 @@ impl Calculator {
     }
 }
 
+/// Operate on the argument values depending on the `c` character.
+///
+/// The first argument, `a`, is the one the operation is applied to,
+/// for example 
+/// ```
+/// operate(8.0, 2.0, '/')
+/// ```
+/// divides 8.0 by 2.0, not the other way.
+///
+/// If either `a` or `b` is NaN or inf, return an error (because it's not obvious how the
+/// application should behave in those cases)
+///
+/// If dividing by zero or trying to use an unrecognized operator, an error is also returned.
+///
 fn operate(a: f64, b: f64, c: char) -> Result<f64, String> {
 
     // neither a or b should ever be NaN or infinite (should be caught beforehand), 
