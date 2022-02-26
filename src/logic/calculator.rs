@@ -175,8 +175,6 @@ fn operate(a: f64, b: f64, op: Operator) -> Result<f64, String> {
 #[cfg(test)]
 mod eval_postfix_tests {
     use super::*;
-//    use super::Number::{Integer, Float};
-    use super::Operator::*;
 
     #[test]
     fn single_digit_works() {

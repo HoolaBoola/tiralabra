@@ -305,8 +305,6 @@
 <span id="304">304</span>
 <span id="305">305</span>
 <span id="306">306</span>
-<span id="307">307</span>
-<span id="308">308</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">super</span>::shunting_yard</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::tokenize</span>;
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
@@ -484,8 +482,6 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">eval_postfix_tests</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-<span class="comment">//    use super::Number::{Integer, Float};</span>
-    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::Operator</span>::<span class="kw-2">*</span>;
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">single_digit_works</span>() {
