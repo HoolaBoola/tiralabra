@@ -149,7 +149,6 @@ fn get_function(s: &str) -> Option<Function> {
 #[cfg(test)]
 mod tokenize_tests {
     use super::*;
-    use super::Operator::*;
 
     #[test]
     fn simple_case() {
