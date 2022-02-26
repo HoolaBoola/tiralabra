@@ -1,6 +1,6 @@
 use super::enums::Token::{self, *};
 //use super::enums::Number;
-use super::enums::Operator;
+use super::enums::Operator::{self, *};
 use super::enums::Function;
 
 /// Tokenize a string into a `Vec` of Tokens.
@@ -101,7 +101,7 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
             if is_function {
 
                 if let Some(fun) = get_function(&var_string) {
-                    output.push(Function(fun));
+                    output.push(Op(Func(fun)));
                 } else {
                     return Err(format!("Unknown function: {var_string}"));
                 }

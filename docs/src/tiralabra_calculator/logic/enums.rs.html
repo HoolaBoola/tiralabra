@@ -136,6 +136,27 @@
 <span id="135">135</span>
 <span id="136">136</span>
 <span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
 </pre><pre class="rust"><code><span class="doccomment">/// Token can represent either a `Number`, a `Float`, a `Variable` or an `Operator`</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Now, one can create a `Vec&lt;Token&gt;` with numbers and operators mixed without</span>
@@ -151,8 +172,7 @@
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Token</span> {
     <span class="ident">Number</span>(<span class="ident">f64</span>),
     <span class="ident">Op</span>(<span class="ident">Operator</span>),
-    <span class="ident">Variable</span>(<span class="ident">String</span>),
-    <span class="ident">Function</span>(<span class="ident">Function</span>)
+    <span class="ident">Variable</span>(<span class="ident">String</span>)
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>)]</span>
@@ -164,31 +184,53 @@
     <span class="ident">Pow</span>,
     <span class="ident">Lparen</span>,
     <span class="ident">Rparen</span>,
-    <span class="ident">Equals</span>
+    <span class="ident">Equals</span>,
+    <span class="ident">Func</span>(<span class="ident">Function</span>)
 }
 
 <span class="kw">impl</span> <span class="ident">std::fmt::Display</span> <span class="kw">for</span> <span class="ident">Operator</span> {
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">std::fmt::Formatter</span>) -&gt; <span class="ident">std::fmt::Result</span> {
         <span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">Operator::Plus</span> =&gt; <span class="string">&#39;+&#39;</span>,
-            <span class="ident">Operator::Minus</span> =&gt; <span class="string">&#39;-&#39;</span>,
-            <span class="ident">Operator::Mul</span> =&gt; <span class="string">&#39;*&#39;</span>,
-            <span class="ident">Operator::Div</span> =&gt; <span class="string">&#39;/&#39;</span>,
-            <span class="ident">Operator::Pow</span> =&gt; <span class="string">&#39;^&#39;</span>,
-            <span class="ident">Operator::Lparen</span> =&gt; <span class="string">&#39;(&#39;</span>,
-            <span class="ident">Operator::Rparen</span> =&gt; <span class="string">&#39;)&#39;</span>,
-            <span class="ident">Operator::Equals</span> =&gt; <span class="string">&#39;=&#39;</span>
+            <span class="ident">Operator::Plus</span> =&gt; <span class="string">&quot;+&quot;</span>,
+            <span class="ident">Operator::Minus</span> =&gt; <span class="string">&quot;-&quot;</span>,
+            <span class="ident">Operator::Mul</span> =&gt; <span class="string">&quot;*&quot;</span>,
+            <span class="ident">Operator::Div</span> =&gt; <span class="string">&quot;/&quot;</span>,
+            <span class="ident">Operator::Pow</span> =&gt; <span class="string">&quot;^&quot;</span>,
+            <span class="ident">Operator::Lparen</span> =&gt; <span class="string">&quot;(&quot;</span>,
+            <span class="ident">Operator::Rparen</span> =&gt; <span class="string">&quot;)&quot;</span>,
+            <span class="ident">Operator::Equals</span> =&gt; <span class="string">&quot;=&quot;</span>,
+            <span class="ident">Operator::Func</span>(<span class="ident">fun</span>) =&gt; <span class="ident">fun</span>.<span class="ident">format</span>()
         };
         <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{c}&quot;</span>)
     }
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Function</span> {
     <span class="ident">Sin</span>,
     <span class="ident">Cos</span>,
     <span class="ident">Tan</span>,
     <span class="ident">Sqrt</span>
+}
+
+<span class="kw">impl</span> <span class="ident">Function</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">evaluate</span>(<span class="self">self</span>, <span class="ident">param</span>: <span class="ident">f64</span>) -&gt; <span class="ident">f64</span> {
+        <span class="kw">match</span> <span class="self">self</span> {
+            <span class="ident">Function::Sin</span> =&gt; <span class="ident">param</span>.<span class="ident">sin</span>(),
+            <span class="ident">Function::Cos</span> =&gt; <span class="ident">param</span>.<span class="ident">cos</span>(),
+            <span class="ident">Function::Tan</span> =&gt; <span class="ident">param</span>.<span class="ident">tan</span>(),
+            <span class="ident">Function::Sqrt</span> =&gt; <span class="ident">param</span>.<span class="ident">sqrt</span>()
+        }
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format</span>(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+        <span class="kw">match</span> <span class="self">self</span> {
+            <span class="ident">Function::Sin</span> =&gt; <span class="string">&quot;sin&quot;</span>,
+            <span class="ident">Function::Cos</span> =&gt; <span class="string">&quot;cos&quot;</span>,
+            <span class="ident">Function::Tan</span> =&gt; <span class="string">&quot;tan&quot;</span>,
+            <span class="ident">Function::Sqrt</span> =&gt; <span class="string">&quot;sqrt&quot;</span>,
+        }
+    }
 }
 
 <span class="comment">// #[derive(Debug, PartialEq, Clone, Copy)]</span>

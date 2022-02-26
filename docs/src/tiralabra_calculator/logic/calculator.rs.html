@@ -304,12 +304,15 @@
 <span id="303">303</span>
 <span id="304">304</span>
 <span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">super</span>::shunting_yard</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::tokenize</span>;
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::enums::Token</span>::{<span class="self">self</span>, <span class="ident">Op</span>, <span class="ident">Variable</span>, <span class="ident">Number</span>};
 <span class="comment">// use super::enums::Number;</span>
-<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::enums::Operator</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::enums::Operator</span>::{<span class="self">self</span>, <span class="kw-2">*</span>};
 
 <span class="doccomment">/// Struct for keeping track of history and variables, and performing calculations.</span>
 <span class="doccomment">///</span>
@@ -401,6 +404,10 @@
         <span class="kw">for</span> <span class="ident">token</span> <span class="kw">in</span> <span class="ident">input</span> {
             <span class="kw">match</span> <span class="ident">token</span> {
                 <span class="ident">Number</span>(<span class="ident">num</span>) =&gt; <span class="ident">stack</span>.<span class="ident">push</span>(<span class="ident">num</span>),
+                <span class="ident">Op</span>(<span class="ident">Func</span>(<span class="ident">fun</span>)) =&gt; {
+                    <span class="kw">let</span> <span class="ident">arg</span> <span class="op">=</span> <span class="ident">stack</span>.<span class="ident">pop</span>().<span class="ident">ok_or</span>(<span class="string">&quot;Too few numbers&quot;</span>)<span class="question-mark">?</span>;
+                    <span class="ident">stack</span>.<span class="ident">push</span>(<span class="ident">fun</span>.<span class="ident">evaluate</span>(<span class="ident">arg</span>));
+                }
                 <span class="ident">Op</span>(<span class="ident">op</span>) =&gt; {
                     <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">stack</span>.<span class="ident">pop</span>().<span class="ident">ok_or</span>(<span class="string">&quot;Too many operators&quot;</span>)<span class="question-mark">?</span>;
                     <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">stack</span>.<span class="ident">pop</span>().<span class="ident">ok_or</span>(<span class="string">&quot;Too many operators&quot;</span>)<span class="question-mark">?</span>;
@@ -418,7 +425,6 @@
                         <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Undefined variable: {var}&quot;</span>));
                     }
                 }
-                <span class="kw">_</span> =&gt; ()
             }
         }
 
