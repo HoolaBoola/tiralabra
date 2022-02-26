@@ -1,7 +1,9 @@
 use super::shunting_yard;
 use super::tokenize;
 use std::collections::HashMap;
-use Token::*;
+use super::enums::Token::{self, Op, Variable, Value};
+use super::enums::Number;
+use super::enums::Operator;
 
 /// Struct for keeping track of history and variables, and performing calculations.
 ///
@@ -27,7 +29,7 @@ use Token::*;
 /// ```
 ///
 pub struct Calculator {
-    variables: HashMap<String, f64>,
+    variables: HashMap<String, Number>,
 }
 
 impl Calculator {
@@ -88,13 +90,12 @@ impl Calculator {
 
     /// Calculates a postfix expression and returns a single numerical value. (Or an error if the
     /// expression is malformed)
-    fn eval_postfix(&self, input: Vec<Token>) -> Result<f64, String> {
+    fn eval_postfix(&self, input: Vec<Token>) -> Result<Number, String> {
         let mut stack = Vec::new();
         for token in input {
             match token {
-                Number(num) => stack.push(num),
-                Float(num) => stack.push(num),
-                Operator(op) => {
+                Value(num) => stack.push(num),
+                Op(op) => {
                     let a = stack.pop().ok_or("Too many operators")?;
                     let b = stack.pop().ok_or("Too many operators")?;
                     match operate(b, a, op) {
@@ -111,6 +112,7 @@ impl Calculator {
                         return Err(format!("Undefined variable: {var}"));
                     }
                 }
+                _ => ()
             }
         }
 
@@ -137,53 +139,35 @@ impl Calculator {
 ///
 /// If dividing by zero or trying to use an unrecognized operator, an error is also returned.
 ///
-fn operate(a: f64, b: f64, c: char) -> Result<f64, String> {
-
+fn operate(a: Number, b: Number, op: Operator) -> Result<Number, String> {
+    use crate::logic::enums::Operator::*;
     // neither a or b should ever be NaN or infinite (should be caught beforehand), 
     // but in case it happens anyway, return an error
-    if a.is_nan() || b.is_nan() {
+    if a.unwrap().is_nan() || b.unwrap().is_nan() {
         return Err("At least one argument is not a number (NaN)".to_string())
     }
-    if a.is_infinite() || b.is_infinite() {
+    if a.unwrap().is_infinite() || b.unwrap().is_infinite() {
         return Err("At least one argument is infinite".to_string());
     }
 
-    match c {
-        '+' => Ok(a + b),
-        '-' => Ok(a - b),
-        '*' => Ok(a * b),
-        '/' => {
-            if b != 0.0 {
-                Ok(a / b)
-            } else {
+    match op {
+        Plus => Ok(a + b),
+        Minus => Ok(a - b),
+        Mul => Ok(a * b),
+        Div => {
+            if b.unwrap() == 0.0 {
                 Err("Trying to divide by zero!".to_string())
+            } else {
+                Ok(a / b)
             }
         }
-        '^' => Ok(a.powf(b)),
+        Pow => Ok(a.pow(b)),
         // should not be reached ever, but in case of error elsewhere,
         // this branch will catch it
-        _ => Err(format!("Unrecognized operator: {c}")),
+        _ => Err(format!("Unrecognized operator: {op:?}")),
     }
 }
 
-/// Token can represent either a `Number`, a `Float`, a `Variable` or an `Operator`
-///
-/// Now, one can create a `Vec<Token>` with numbers and operators mixed without
-/// losing type safety.
-///
-/// ```
-/// let a = Number(1);
-/// let b = Operator('+');
-/// let output = vec![a, b];
-/// ```
-///
-#[derive(Debug, PartialEq)]
-pub enum Token {
-    Number(f64),
-    Operator(char),
-    Float(f64),
-    Variable(String),
-}
 
 #[cfg(test)]
 mod eval_postfix_tests {

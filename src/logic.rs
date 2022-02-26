@@ -10,3 +10,5 @@ mod tokenize;
 // `use ...::shunting_yard::shunting_yard`;
 use shunting_yard::shunting_yard;
 use tokenize::tokenize;
+
+mod enums;

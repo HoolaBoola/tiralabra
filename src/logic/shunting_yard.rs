@@ -1,5 +1,6 @@
-use super::calculator::Token::{self, Float, Number, Operator, Variable};
-
+use super::enums::Token::{self, Value, Variable, Op};
+use super::enums::Operator::{self, Lparen, Rparen, Plus, Minus, Mul, Div, Pow};
+use super::enums::Number::{Integer, Float};
 /// Returns the precedence value for given operator, as described in
 /// [here](https://en.wikipedia.org/wiki/Shunting-yard_algorithm#Detailed_example):
 ///
@@ -11,11 +12,11 @@ use super::calculator::Token::{self, Float, Number, Operator, Variable};
 /// precedence('+'); // Some(2)
 /// precedence('h'); // None
 /// ```
-fn precedence(c: char) -> Option<u8> {
-    match c {
-        '+' | '-' => Some(2),
-        '*' | '/' => Some(3),
-        '^' => Some(4),
+fn precedence(op: Operator) -> Option<u8> {
+    match op {
+        Plus | Minus => Some(2),
+        Mul | Div => Some(3),
+        Pow => Some(4),
         _ => None,
     }
 }
@@ -44,23 +45,23 @@ pub fn shunting_yard(input: Vec<Token>) -> Result<Vec<Token>, String> {
 
     for token in input {
         match token {
-            Operator('(') => operators.push('('),
-            Operator(')') => {
+            Op(Lparen) => operators.push(Lparen),
+            Op(Rparen) => {
                 let mut found = false;
                 while let Some(op) = operators.pop() {
-                    if op == '(' {
+                    if op == Lparen {
                         found = true;
                         break;
                     }
 
-                    output.push(Operator(op));
+                    output.push(Op(op));
                 }
 
                 if !found {
                     return Err("Right parenthesis without a pair found".to_string());
                 }
             }
-            Operator(op) => {
+            Op(op) => {
                 if !is_operator_time {
                     return Err(format!("Unexpected operator: {op}"));
                 }
@@ -68,7 +69,7 @@ pub fn shunting_yard(input: Vec<Token>) -> Result<Vec<Token>, String> {
                 if let Some(p1) = precedence(op) {
                     while !operators.is_empty() {
                         let last_operator = operators[operators.len() - 1];
-                        if last_operator == '(' {
+                        if last_operator == Lparen {
                             break;
                         }
 
@@ -77,27 +78,28 @@ pub fn shunting_yard(input: Vec<Token>) -> Result<Vec<Token>, String> {
                                 break;
                             }
                         }
-                        output.push(Operator(operators.pop().unwrap()));
+                        output.push(Op(operators.pop().unwrap()));
                     }
 
                     operators.push(op);
                 }
             }
-            Number(_) | Float(_) | Variable(_) => {
+            Value(Integer(_) | Float(_)) | Variable(_) => {
                 if is_operator_time {
                     return Err("Too many numbers in a row".to_string());
                 }
                 is_operator_time = true;
                 output.push(token);
             }
+            _ => ()
         }
     }
 
     while let Some(op) = operators.pop() {
-        if op == '(' {
+        if op == Lparen {
             return Err("Left parenthesis without a pair found".to_string());
         }
-        output.push(Operator(op));
+        output.push(Op(op));
     }
 
     Ok(output)
