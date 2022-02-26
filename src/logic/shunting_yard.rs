@@ -1,5 +1,5 @@
 use super::enums::Token::{self, Variable, Op, Number};
-use super::enums::Operator::{self, Lparen, Rparen, Plus, Minus, Mul, Div, Pow};
+use super::enums::Operator::{self, Lparen, Rparen, Plus, Minus, Mul, Div, Pow, Func};
 // use super::enums::Number::{Integer, Float};
 /// Returns the precedence value for given operator, as described in
 /// [here](https://en.wikipedia.org/wiki/Shunting-yard_algorithm#Detailed_example):
@@ -45,6 +45,7 @@ pub fn shunting_yard(input: Vec<Token>) -> Result<Vec<Token>, String> {
 
     for token in input {
         match token {
+            Op(f @ Func(_)) => operators.push(f),
             Op(Lparen) => operators.push(Lparen),
             Op(Rparen) => {
                 let mut found = false;
@@ -91,7 +92,6 @@ pub fn shunting_yard(input: Vec<Token>) -> Result<Vec<Token>, String> {
                 is_operator_time = true;
                 output.push(token);
             }
-            _ => ()
         }
     }
 

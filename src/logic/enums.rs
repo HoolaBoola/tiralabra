@@ -13,8 +13,7 @@
 pub enum Token {
     Number(f64),
     Op(Operator),
-    Variable(String),
-    Function(Function)
+    Variable(String)
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -26,31 +25,53 @@ pub enum Operator {
     Pow,
     Lparen,
     Rparen,
-    Equals
+    Equals,
+    Func(Function)
 }
 
 impl std::fmt::Display for Operator {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let c = match self {
-            Operator::Plus => '+',
-            Operator::Minus => '-',
-            Operator::Mul => '*',
-            Operator::Div => '/',
-            Operator::Pow => '^',
-            Operator::Lparen => '(',
-            Operator::Rparen => ')',
-            Operator::Equals => '='
+            Operator::Plus => "+",
+            Operator::Minus => "-",
+            Operator::Mul => "*",
+            Operator::Div => "/",
+            Operator::Pow => "^",
+            Operator::Lparen => "(",
+            Operator::Rparen => ")",
+            Operator::Equals => "=",
+            Operator::Func(fun) => fun.format()
         };
         write!(f, "{c}")
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Function {
     Sin,
     Cos,
     Tan,
     Sqrt
+}
+
+impl Function {
+    pub fn evaluate(self, param: f64) -> f64 {
+        match self {
+            Function::Sin => param.sin(),
+            Function::Cos => param.cos(),
+            Function::Tan => param.tan(),
+            Function::Sqrt => param.sqrt()
+        }
+    }
+
+    pub fn format(self) -> &'static str {
+        match self {
+            Function::Sin => "sin",
+            Function::Cos => "cos",
+            Function::Tan => "tan",
+            Function::Sqrt => "sqrt",
+        }
+    }
 }
 
 // #[derive(Debug, PartialEq, Clone, Copy)]

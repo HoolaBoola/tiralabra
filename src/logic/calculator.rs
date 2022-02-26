@@ -3,7 +3,7 @@ use super::tokenize;
 use std::collections::HashMap;
 use super::enums::Token::{self, Op, Variable, Number};
 // use super::enums::Number;
-use super::enums::Operator;
+use super::enums::Operator::{self, *};
 
 /// Struct for keeping track of history and variables, and performing calculations.
 ///
@@ -95,6 +95,10 @@ impl Calculator {
         for token in input {
             match token {
                 Number(num) => stack.push(num),
+                Op(Func(fun)) => {
+                    let arg = stack.pop().ok_or("Too few numbers")?;
+                    stack.push(fun.evaluate(arg));
+                }
                 Op(op) => {
                     let a = stack.pop().ok_or("Too many operators")?;
                     let b = stack.pop().ok_or("Too many operators")?;
@@ -112,7 +116,6 @@ impl Calculator {
                         return Err(format!("Undefined variable: {var}"));
                     }
                 }
-                _ => ()
             }
         }
 
