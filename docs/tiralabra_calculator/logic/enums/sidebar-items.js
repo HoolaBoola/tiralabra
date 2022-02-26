@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Function",""],["Operator",""],["Token","Token can represent either a `Number`, a `Float`, a `Variable` or an `Operator`"]]});

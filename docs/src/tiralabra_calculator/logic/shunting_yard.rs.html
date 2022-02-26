@@ -203,8 +203,11 @@
 <span id="202">202</span>
 <span id="203">203</span>
 <span id="204">204</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">super</span>::calculator::Token</span>::{<span class="self">self</span>, <span class="ident">Float</span>, <span class="ident">Number</span>, <span class="ident">Operator</span>, <span class="ident">Variable</span>};
-
+<span id="205">205</span>
+<span id="206">206</span>
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">super</span>::enums::Token</span>::{<span class="self">self</span>, <span class="ident">Variable</span>, <span class="ident">Op</span>, <span class="ident">Number</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::enums::Operator</span>::{<span class="self">self</span>, <span class="ident">Lparen</span>, <span class="ident">Rparen</span>, <span class="ident">Plus</span>, <span class="ident">Minus</span>, <span class="ident">Mul</span>, <span class="ident">Div</span>, <span class="ident">Pow</span>};
+<span class="comment">// use super::enums::Number::{Integer, Float};</span>
 <span class="doccomment">/// Returns the precedence value for given operator, as described in</span>
 <span class="doccomment">/// [here](https://en.wikipedia.org/wiki/Shunting-yard_algorithm#Detailed_example):</span>
 <span class="doccomment">///</span>
@@ -216,11 +219,11 @@
 <span class="doccomment">/// precedence(&#39;+&#39;); // Some(2)</span>
 <span class="doccomment">/// precedence(&#39;h&#39;); // None</span>
 <span class="doccomment">/// ```</span>
-<span class="kw">fn</span> <span class="ident">precedence</span>(<span class="ident">c</span>: <span class="ident">char</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
-    <span class="kw">match</span> <span class="ident">c</span> {
-        <span class="string">&#39;+&#39;</span> <span class="op">|</span> <span class="string">&#39;-&#39;</span> =&gt; <span class="prelude-val">Some</span>(<span class="number">2</span>),
-        <span class="string">&#39;*&#39;</span> <span class="op">|</span> <span class="string">&#39;/&#39;</span> =&gt; <span class="prelude-val">Some</span>(<span class="number">3</span>),
-        <span class="string">&#39;^&#39;</span> =&gt; <span class="prelude-val">Some</span>(<span class="number">4</span>),
+<span class="kw">fn</span> <span class="ident">precedence</span>(<span class="ident">op</span>: <span class="ident">Operator</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+    <span class="kw">match</span> <span class="ident">op</span> {
+        <span class="ident">Plus</span> <span class="op">|</span> <span class="ident">Minus</span> =&gt; <span class="prelude-val">Some</span>(<span class="number">2</span>),
+        <span class="ident">Mul</span> <span class="op">|</span> <span class="ident">Div</span> =&gt; <span class="prelude-val">Some</span>(<span class="number">3</span>),
+        <span class="ident">Pow</span> =&gt; <span class="prelude-val">Some</span>(<span class="number">4</span>),
         <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
     }
 }
@@ -249,23 +252,23 @@
 
     <span class="kw">for</span> <span class="ident">token</span> <span class="kw">in</span> <span class="ident">input</span> {
         <span class="kw">match</span> <span class="ident">token</span> {
-            <span class="ident">Operator</span>(<span class="string">&#39;(&#39;</span>) =&gt; <span class="ident">operators</span>.<span class="ident">push</span>(<span class="string">&#39;(&#39;</span>),
-            <span class="ident">Operator</span>(<span class="string">&#39;)&#39;</span>) =&gt; {
+            <span class="ident">Op</span>(<span class="ident">Lparen</span>) =&gt; <span class="ident">operators</span>.<span class="ident">push</span>(<span class="ident">Lparen</span>),
+            <span class="ident">Op</span>(<span class="ident">Rparen</span>) =&gt; {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">found</span> <span class="op">=</span> <span class="bool-val">false</span>;
                 <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">op</span>) <span class="op">=</span> <span class="ident">operators</span>.<span class="ident">pop</span>() {
-                    <span class="kw">if</span> <span class="ident">op</span> <span class="op">==</span> <span class="string">&#39;(&#39;</span> {
+                    <span class="kw">if</span> <span class="ident">op</span> <span class="op">==</span> <span class="ident">Lparen</span> {
                         <span class="ident">found</span> <span class="op">=</span> <span class="bool-val">true</span>;
                         <span class="kw">break</span>;
                     }
 
-                    <span class="ident">output</span>.<span class="ident">push</span>(<span class="ident">Operator</span>(<span class="ident">op</span>));
+                    <span class="ident">output</span>.<span class="ident">push</span>(<span class="ident">Op</span>(<span class="ident">op</span>));
                 }
 
                 <span class="kw">if</span> <span class="op">!</span><span class="ident">found</span> {
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Right parenthesis without a pair found&quot;</span>.<span class="ident">to_string</span>());
                 }
             }
-            <span class="ident">Operator</span>(<span class="ident">op</span>) =&gt; {
+            <span class="ident">Op</span>(<span class="ident">op</span>) =&gt; {
                 <span class="kw">if</span> <span class="op">!</span><span class="ident">is_operator_time</span> {
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Unexpected operator: {op}&quot;</span>));
                 }
@@ -273,7 +276,7 @@
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">p1</span>) <span class="op">=</span> <span class="ident">precedence</span>(<span class="ident">op</span>) {
                     <span class="kw">while</span> <span class="op">!</span><span class="ident">operators</span>.<span class="ident">is_empty</span>() {
                         <span class="kw">let</span> <span class="ident">last_operator</span> <span class="op">=</span> <span class="ident">operators</span>[<span class="ident">operators</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>];
-                        <span class="kw">if</span> <span class="ident">last_operator</span> <span class="op">==</span> <span class="string">&#39;(&#39;</span> {
+                        <span class="kw">if</span> <span class="ident">last_operator</span> <span class="op">==</span> <span class="ident">Lparen</span> {
                             <span class="kw">break</span>;
                         }
 
@@ -282,27 +285,28 @@
                                 <span class="kw">break</span>;
                             }
                         }
-                        <span class="ident">output</span>.<span class="ident">push</span>(<span class="ident">Operator</span>(<span class="ident">operators</span>.<span class="ident">pop</span>().<span class="ident">unwrap</span>()));
+                        <span class="ident">output</span>.<span class="ident">push</span>(<span class="ident">Op</span>(<span class="ident">operators</span>.<span class="ident">pop</span>().<span class="ident">unwrap</span>()));
                     }
 
                     <span class="ident">operators</span>.<span class="ident">push</span>(<span class="ident">op</span>);
                 }
             }
-            <span class="ident">Number</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">Float</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">Variable</span>(<span class="kw">_</span>) =&gt; {
+            <span class="ident">Number</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">Variable</span>(<span class="kw">_</span>) =&gt; {
                 <span class="kw">if</span> <span class="ident">is_operator_time</span> {
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Too many numbers in a row&quot;</span>.<span class="ident">to_string</span>());
                 }
                 <span class="ident">is_operator_time</span> <span class="op">=</span> <span class="bool-val">true</span>;
                 <span class="ident">output</span>.<span class="ident">push</span>(<span class="ident">token</span>);
             }
+            <span class="kw">_</span> =&gt; ()
         }
     }
 
     <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">op</span>) <span class="op">=</span> <span class="ident">operators</span>.<span class="ident">pop</span>() {
-        <span class="kw">if</span> <span class="ident">op</span> <span class="op">==</span> <span class="string">&#39;(&#39;</span> {
+        <span class="kw">if</span> <span class="ident">op</span> <span class="op">==</span> <span class="ident">Lparen</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Left parenthesis without a pair found&quot;</span>.<span class="ident">to_string</span>());
         }
-        <span class="ident">output</span>.<span class="ident">push</span>(<span class="ident">Operator</span>(<span class="ident">op</span>));
+        <span class="ident">output</span>.<span class="ident">push</span>(<span class="ident">Op</span>(<span class="ident">op</span>));
     }
 
     <span class="prelude-val">Ok</span>(<span class="ident">output</span>)
@@ -322,9 +326,9 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">one_plus_one_works</span>() {
-        <span class="kw">let</span> <span class="ident">tokens</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="ident">Number</span>(<span class="number">1.0</span>), <span class="ident">Operator</span>(<span class="string">&#39;+&#39;</span>), <span class="ident">Number</span>(<span class="number">1.0</span>)];
+        <span class="kw">let</span> <span class="ident">tokens</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="ident">Number</span>(<span class="number">1.0</span>), <span class="ident">Op</span>(<span class="ident">Plus</span>), <span class="ident">Number</span>(<span class="number">1.0</span>)];
         <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">shunting_yard</span>(<span class="ident">tokens</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">correct</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="ident">Number</span>(<span class="number">1.0</span>), <span class="ident">Number</span>(<span class="number">1.0</span>), <span class="ident">Operator</span>(<span class="string">&#39;+&#39;</span>)];
+        <span class="kw">let</span> <span class="ident">correct</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="ident">Number</span>(<span class="number">1.0</span>), <span class="ident">Number</span>(<span class="number">1.0</span>), <span class="ident">Op</span>(<span class="ident">Plus</span>)];
         <span class="macro">assert_eq!</span>(<span class="ident">res</span>, <span class="ident">correct</span>);
     }
 
@@ -332,9 +336,9 @@
     <span class="kw">fn</span> <span class="ident">one_plus_two_times_four_works</span>() {
         <span class="kw">let</span> <span class="ident">tokens</span> <span class="op">=</span> <span class="macro">vec!</span>[
             <span class="ident">Number</span>(<span class="number">1.0</span>),
-            <span class="ident">Operator</span>(<span class="string">&#39;+&#39;</span>),
+            <span class="ident">Op</span>(<span class="ident">Plus</span>),
             <span class="ident">Number</span>(<span class="number">2.0</span>),
-            <span class="ident">Operator</span>(<span class="string">&#39;*&#39;</span>),
+            <span class="ident">Op</span>(<span class="ident">Mul</span>),
             <span class="ident">Number</span>(<span class="number">4.0</span>),
         ];
         <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">shunting_yard</span>(<span class="ident">tokens</span>).<span class="ident">unwrap</span>();
@@ -342,8 +346,8 @@
             <span class="ident">Number</span>(<span class="number">1.0</span>),
             <span class="ident">Number</span>(<span class="number">2.0</span>),
             <span class="ident">Number</span>(<span class="number">4.0</span>),
-            <span class="ident">Operator</span>(<span class="string">&#39;*&#39;</span>),
-            <span class="ident">Operator</span>(<span class="string">&#39;+&#39;</span>),
+            <span class="ident">Op</span>(<span class="ident">Mul</span>),
+            <span class="ident">Op</span>(<span class="ident">Plus</span>),
         ];
         <span class="macro">assert_eq!</span>(<span class="ident">res</span>, <span class="ident">correct</span>);
     }
@@ -352,9 +356,9 @@
     <span class="kw">fn</span> <span class="ident">exponents_work</span>() {
         <span class="kw">let</span> <span class="ident">tokens</span> <span class="op">=</span> <span class="macro">vec!</span>[
             <span class="ident">Number</span>(<span class="number">2.0</span>),
-            <span class="ident">Operator</span>(<span class="string">&#39;^&#39;</span>),
+            <span class="ident">Op</span>(<span class="ident">Pow</span>),
             <span class="ident">Number</span>(<span class="number">4.0</span>),
-            <span class="ident">Operator</span>(<span class="string">&#39;*&#39;</span>),
+            <span class="ident">Op</span>(<span class="ident">Mul</span>),
             <span class="ident">Number</span>(<span class="number">2.0</span>),
         ];
 
@@ -362,9 +366,9 @@
         <span class="kw">let</span> <span class="ident">correct</span> <span class="op">=</span> <span class="macro">vec!</span>[
             <span class="ident">Number</span>(<span class="number">2.0</span>),
             <span class="ident">Number</span>(<span class="number">4.0</span>),
-            <span class="ident">Operator</span>(<span class="string">&#39;^&#39;</span>),
+            <span class="ident">Op</span>(<span class="ident">Pow</span>),
             <span class="ident">Number</span>(<span class="number">2.0</span>),
-            <span class="ident">Operator</span>(<span class="string">&#39;*&#39;</span>),
+            <span class="ident">Op</span>(<span class="ident">Mul</span>),
         ];
 
         <span class="macro">assert_eq!</span>(<span class="ident">res</span>, <span class="ident">correct</span>);
@@ -374,11 +378,11 @@
     <span class="kw">fn</span> <span class="ident">mismatched_right_parenthesis_errors</span>() {
         <span class="kw">let</span> <span class="ident">tokens</span> <span class="op">=</span> <span class="macro">vec!</span>[
             <span class="ident">Number</span>(<span class="number">1.0</span>),
-            <span class="ident">Operator</span>(<span class="string">&#39;+&#39;</span>),
+            <span class="ident">Op</span>(<span class="ident">Plus</span>),
             <span class="ident">Number</span>(<span class="number">2.0</span>),
-            <span class="ident">Operator</span>(<span class="string">&#39;*&#39;</span>),
+            <span class="ident">Op</span>(<span class="ident">Mul</span>),
             <span class="ident">Number</span>(<span class="number">3.0</span>),
-            <span class="ident">Operator</span>(<span class="string">&#39;)&#39;</span>),
+            <span class="ident">Op</span>(<span class="ident">Rparen</span>),
         ];
         <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">shunting_yard</span>(<span class="ident">tokens</span>);
         <span class="macro">assert!</span>(<span class="ident">res</span>.<span class="ident">is_err</span>());
@@ -388,10 +392,10 @@
     <span class="kw">fn</span> <span class="ident">mismatched_left_parenthesis_errors</span>() {
         <span class="kw">let</span> <span class="ident">tokens</span> <span class="op">=</span> <span class="macro">vec!</span>[
             <span class="ident">Number</span>(<span class="number">1.0</span>),
-            <span class="ident">Operator</span>(<span class="string">&#39;+&#39;</span>),
-            <span class="ident">Operator</span>(<span class="string">&#39;(&#39;</span>),
+            <span class="ident">Op</span>(<span class="ident">Plus</span>),
+            <span class="ident">Op</span>(<span class="ident">Lparen</span>),
             <span class="ident">Number</span>(<span class="number">2.0</span>),
-            <span class="ident">Operator</span>(<span class="string">&#39;*&#39;</span>),
+            <span class="ident">Op</span>(<span class="ident">Mul</span>),
             <span class="ident">Number</span>(<span class="number">3.0</span>),
         ];
         <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">shunting_yard</span>(<span class="ident">tokens</span>);
@@ -400,7 +404,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">too_many_numbers_in_a_row</span>() {
-        <span class="kw">let</span> <span class="ident">tokens</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="ident">Number</span>(<span class="number">1.0</span>), <span class="ident">Number</span>(<span class="number">2.0</span>), <span class="ident">Operator</span>(<span class="string">&#39;*&#39;</span>), <span class="ident">Number</span>(<span class="number">100.0</span>)];
+        <span class="kw">let</span> <span class="ident">tokens</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="ident">Number</span>(<span class="number">1.0</span>), <span class="ident">Number</span>(<span class="number">2.0</span>), <span class="ident">Op</span>(<span class="ident">Mul</span>), <span class="ident">Number</span>(<span class="number">100.0</span>)];
 
         <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">shunting_yard</span>(<span class="ident">tokens</span>);
 

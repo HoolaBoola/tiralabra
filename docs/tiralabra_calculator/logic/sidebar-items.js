@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["calculator",""],["shunting_yard",""],["tokenize",""]]});
+initSidebarItems({"mod":[["calculator",""],["enums",""],["shunting_yard",""],["tokenize",""]]});

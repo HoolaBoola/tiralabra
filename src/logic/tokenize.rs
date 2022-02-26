@@ -1,4 +1,7 @@
-use super::calculator::Token::{self, Float, Number, Operator, Variable};
+use super::enums::Token::{self, *};
+//use super::enums::Number;
+use super::enums::Operator;
+use super::enums::Function;
 
 /// Tokenize a string into a `Vec` of Tokens.
 ///
@@ -31,7 +34,7 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
             // input
             matches!(
                 (output.last(), chars.peek()),
-                (Some(Operator(_)) | None, Some('0'..='9'))
+                (Some(Op(_)) | None, Some('0'..='9'))
             )
         } else {
             false
@@ -60,21 +63,14 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
                 chars.next();
             }
 
-            // if the number contained a decimal separator ('.'), then push a Token::Float
-            // else, push a Token::Number
-            if found_decimal {
-                let &num = &num_string.parse::<f64>().unwrap();
-                output.push(Float(num));
-            } else {
-                let &num = &num_string.parse::<f64>().unwrap();
-                output.push(Number(num));
-            }
+            let &num = &num_string.parse::<f64>().unwrap();
+            output.push(Number(num));
             continue;
         }
 
         // handle case of `c` being one of '+', '/', etc.
-        if is_operator(c) {
-            output.push(Operator(c));
+        if let Some(op) = get_operator(c) {
+            output.push(Op(op));
             continue;
         }
 
@@ -84,24 +80,39 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
         }
 
         // if c is a letter, it can either be a variable name or a function
+        // if the following character is a left parenthesis, it's a function
         if c.is_alphabetic() {
             let mut var_string = String::new();
             var_string.push(c);
 
+            let mut is_function = false;
             while let Some(&c) = chars.peek() {
                 if c.is_alphabetic() {
                     var_string.push(c);
+                } else if c.is_whitespace() {
+                } else if c == '(' {
+                    is_function = true;
+                    break;
                 } else {
                     break;
                 }
                 chars.next();
             }
-            output.push(Variable(var_string));
+            if is_function {
+
+                if let Some(fun) = get_function(&var_string) {
+                    output.push(Function(fun));
+                } else {
+                    return Err(format!("Unknown function: {var_string}"));
+                }
+            } else {
+                output.push(Variable(var_string));
+            }
             continue;
         }
 
         if c == '=' {
-            output.push(Operator('='));
+            output.push(Op(Operator::Equals));
             continue;
         }
         return Err(format!("unknown character: {c}"));
@@ -110,13 +121,35 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
 }
 
 /// Return true if `c` is one of the defined mathematical operators
-fn is_operator(c: char) -> bool {
-    matches!(c, '+' | '-' | '*' | '/' | '(' | ')' | '^')
+fn get_operator(c: char) -> Option<Operator> {
+    use self::Operator::*;
+    match c {
+        '+' => Some(Plus),
+        '-' => Some(Minus),
+        '/' => Some(Div),
+        '*' => Some(Mul),
+        '^' => Some(Pow),
+        '(' => Some(Lparen),
+        ')' => Some(Rparen),
+        _ => None
+    }
+}
+
+fn get_function(s: &str) -> Option<Function> {
+    use self::Function::*;
+    match &*s.to_lowercase() {
+        "sin" => Some(Sin),
+        "cos" => Some(Cos),
+        "tan" => Some(Tan),
+        "sqrt" => Some(Sqrt),
+        _ => None
+    }
 }
 
 #[cfg(test)]
 mod tokenize_tests {
     use super::*;
+    use super::Operator::*;
 
     #[test]
     fn simple_case() {
@@ -131,7 +164,7 @@ mod tokenize_tests {
         let test_str = "1 + * /";
         let result = tokenize(test_str).unwrap();
 
-        let correct = vec![Number(1.0), Operator('+'), Operator('*'), Operator('/')];
+        let correct = vec![Number(1.0), Op(Plus), Op(Mul), Op(Div)];
 
         assert_eq!(result, correct);
     }
@@ -141,7 +174,7 @@ mod tokenize_tests {
         let test_str = "1.5";
         let result = tokenize(test_str).unwrap();
 
-        assert_eq!(result, vec![Float(1.5)]);
+        assert_eq!(result, vec![Number(1.5)]);
     }
 
     #[test]
@@ -149,7 +182,7 @@ mod tokenize_tests {
         let test_str = "a + 1";
         let result = tokenize(test_str).unwrap();
 
-        let correct = vec![Variable("a".to_string()), Operator('+'), Number(1.0)];
+        let correct = vec![Variable("a".to_string()), Op(Plus), Number(1.0)];
 
         assert_eq!(result, correct);
     }
@@ -180,7 +213,7 @@ mod is_operator_tests {
         let operators = ['+', '-', '*', '/', '^', '(', ')'];
 
         for operator in operators {
-            assert!(is_operator(operator));
+            assert!(get_operator(operator).is_some());
         }
     }
 
@@ -189,7 +222,7 @@ mod is_operator_tests {
         let not_operators = ['a', '1', '€', '?', '.'];
 
         for not_operator in not_operators {
-            assert!(!is_operator(not_operator));
+            assert!(get_operator(not_operator).is_none());
         }
     }
 }

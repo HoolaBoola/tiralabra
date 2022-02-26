@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["Token","Token can represent either a `Number`, a `Float`, a `Variable` or an `Operator`"]],"fn":[["operate","Operate on the argument values depending on the `c` character."]],"struct":[["Calculator","Struct for keeping track of history and variables, and performing calculations."]]});
+initSidebarItems({"fn":[["operate","Operate on the argument values depending on the `c` character."]],"struct":[["Calculator","Struct for keeping track of history and variables, and performing calculations."]]});

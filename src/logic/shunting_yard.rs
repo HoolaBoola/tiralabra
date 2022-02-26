@@ -1,5 +1,6 @@
-use super::calculator::Token::{self, Float, Number, Operator, Variable};
-
+use super::enums::Token::{self, Variable, Op, Number};
+use super::enums::Operator::{self, Lparen, Rparen, Plus, Minus, Mul, Div, Pow};
+// use super::enums::Number::{Integer, Float};
 /// Returns the precedence value for given operator, as described in
 /// [here](https://en.wikipedia.org/wiki/Shunting-yard_algorithm#Detailed_example):
 ///
@@ -11,11 +12,11 @@ use super::calculator::Token::{self, Float, Number, Operator, Variable};
 /// precedence('+'); // Some(2)
 /// precedence('h'); // None
 /// ```
-fn precedence(c: char) -> Option<u8> {
-    match c {
-        '+' | '-' => Some(2),
-        '*' | '/' => Some(3),
-        '^' => Some(4),
+fn precedence(op: Operator) -> Option<u8> {
+    match op {
+        Plus | Minus => Some(2),
+        Mul | Div => Some(3),
+        Pow => Some(4),
         _ => None,
     }
 }
@@ -44,23 +45,23 @@ pub fn shunting_yard(input: Vec<Token>) -> Result<Vec<Token>, String> {
 
     for token in input {
         match token {
-            Operator('(') => operators.push('('),
-            Operator(')') => {
+            Op(Lparen) => operators.push(Lparen),
+            Op(Rparen) => {
                 let mut found = false;
                 while let Some(op) = operators.pop() {
-                    if op == '(' {
+                    if op == Lparen {
                         found = true;
                         break;
                     }
 
-                    output.push(Operator(op));
+                    output.push(Op(op));
                 }
 
                 if !found {
                     return Err("Right parenthesis without a pair found".to_string());
                 }
             }
-            Operator(op) => {
+            Op(op) => {
                 if !is_operator_time {
                     return Err(format!("Unexpected operator: {op}"));
                 }
@@ -68,7 +69,7 @@ pub fn shunting_yard(input: Vec<Token>) -> Result<Vec<Token>, String> {
                 if let Some(p1) = precedence(op) {
                     while !operators.is_empty() {
                         let last_operator = operators[operators.len() - 1];
-                        if last_operator == '(' {
+                        if last_operator == Lparen {
                             break;
                         }
 
@@ -77,27 +78,28 @@ pub fn shunting_yard(input: Vec<Token>) -> Result<Vec<Token>, String> {
                                 break;
                             }
                         }
-                        output.push(Operator(operators.pop().unwrap()));
+                        output.push(Op(operators.pop().unwrap()));
                     }
 
                     operators.push(op);
                 }
             }
-            Number(_) | Float(_) | Variable(_) => {
+            Number(_) | Variable(_) => {
                 if is_operator_time {
                     return Err("Too many numbers in a row".to_string());
                 }
                 is_operator_time = true;
                 output.push(token);
             }
+            _ => ()
         }
     }
 
     while let Some(op) = operators.pop() {
-        if op == '(' {
+        if op == Lparen {
             return Err("Left parenthesis without a pair found".to_string());
         }
-        output.push(Operator(op));
+        output.push(Op(op));
     }
 
     Ok(output)
@@ -117,9 +119,9 @@ mod shunting_yard_tests {
 
     #[test]
     fn one_plus_one_works() {
-        let tokens = vec![Number(1.0), Operator('+'), Number(1.0)];
+        let tokens = vec![Number(1.0), Op(Plus), Number(1.0)];
         let res = shunting_yard(tokens).unwrap();
-        let correct = vec![Number(1.0), Number(1.0), Operator('+')];
+        let correct = vec![Number(1.0), Number(1.0), Op(Plus)];
         assert_eq!(res, correct);
     }
 
@@ -127,9 +129,9 @@ mod shunting_yard_tests {
     fn one_plus_two_times_four_works() {
         let tokens = vec![
             Number(1.0),
-            Operator('+'),
+            Op(Plus),
             Number(2.0),
-            Operator('*'),
+            Op(Mul),
             Number(4.0),
         ];
         let res = shunting_yard(tokens).unwrap();
@@ -137,8 +139,8 @@ mod shunting_yard_tests {
             Number(1.0),
             Number(2.0),
             Number(4.0),
-            Operator('*'),
-            Operator('+'),
+            Op(Mul),
+            Op(Plus),
         ];
         assert_eq!(res, correct);
     }
@@ -147,9 +149,9 @@ mod shunting_yard_tests {
     fn exponents_work() {
         let tokens = vec![
             Number(2.0),
-            Operator('^'),
+            Op(Pow),
             Number(4.0),
-            Operator('*'),
+            Op(Mul),
             Number(2.0),
         ];
 
@@ -157,9 +159,9 @@ mod shunting_yard_tests {
         let correct = vec![
             Number(2.0),
             Number(4.0),
-            Operator('^'),
+            Op(Pow),
             Number(2.0),
-            Operator('*'),
+            Op(Mul),
         ];
 
         assert_eq!(res, correct);
@@ -169,11 +171,11 @@ mod shunting_yard_tests {
     fn mismatched_right_parenthesis_errors() {
         let tokens = vec![
             Number(1.0),
-            Operator('+'),
+            Op(Plus),
             Number(2.0),
-            Operator('*'),
+            Op(Mul),
             Number(3.0),
-            Operator(')'),
+            Op(Rparen),
         ];
         let res = shunting_yard(tokens);
         assert!(res.is_err());
@@ -183,10 +185,10 @@ mod shunting_yard_tests {
     fn mismatched_left_parenthesis_errors() {
         let tokens = vec![
             Number(1.0),
-            Operator('+'),
-            Operator('('),
+            Op(Plus),
+            Op(Lparen),
             Number(2.0),
-            Operator('*'),
+            Op(Mul),
             Number(3.0),
         ];
         let res = shunting_yard(tokens);
@@ -195,7 +197,7 @@ mod shunting_yard_tests {
 
     #[test]
     fn too_many_numbers_in_a_row() {
-        let tokens = vec![Number(1.0), Number(2.0), Operator('*'), Number(100.0)];
+        let tokens = vec![Number(1.0), Number(2.0), Op(Mul), Number(100.0)];
 
         let res = shunting_yard(tokens);
 

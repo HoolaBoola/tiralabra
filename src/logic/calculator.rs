@@ -1,7 +1,9 @@
 use super::shunting_yard;
 use super::tokenize;
 use std::collections::HashMap;
-use Token::*;
+use super::enums::Token::{self, Op, Variable, Number};
+// use super::enums::Number;
+use super::enums::Operator;
 
 /// Struct for keeping track of history and variables, and performing calculations.
 ///
@@ -93,8 +95,7 @@ impl Calculator {
         for token in input {
             match token {
                 Number(num) => stack.push(num),
-                Float(num) => stack.push(num),
-                Operator(op) => {
+                Op(op) => {
                     let a = stack.pop().ok_or("Too many operators")?;
                     let b = stack.pop().ok_or("Too many operators")?;
                     match operate(b, a, op) {
@@ -111,6 +112,7 @@ impl Calculator {
                         return Err(format!("Undefined variable: {var}"));
                     }
                 }
+                _ => ()
             }
         }
 
@@ -137,8 +139,8 @@ impl Calculator {
 ///
 /// If dividing by zero or trying to use an unrecognized operator, an error is also returned.
 ///
-fn operate(a: f64, b: f64, c: char) -> Result<f64, String> {
-
+fn operate(a: f64, b: f64, op: Operator) -> Result<f64, String> {
+    use crate::logic::enums::Operator::*;
     // neither a or b should ever be NaN or infinite (should be caught beforehand), 
     // but in case it happens anyway, return an error
     if a.is_nan() || b.is_nan() {
@@ -148,46 +150,30 @@ fn operate(a: f64, b: f64, c: char) -> Result<f64, String> {
         return Err("At least one argument is infinite".to_string());
     }
 
-    match c {
-        '+' => Ok(a + b),
-        '-' => Ok(a - b),
-        '*' => Ok(a * b),
-        '/' => {
-            if b != 0.0 {
-                Ok(a / b)
-            } else {
+    match op {
+        Plus => Ok(a + b),
+        Minus => Ok(a - b),
+        Mul => Ok(a * b),
+        Div => {
+            if b == 0.0 {
                 Err("Trying to divide by zero!".to_string())
+            } else {
+                Ok(a / b)
             }
         }
-        '^' => Ok(a.powf(b)),
+        Pow => Ok(a.powf(b)),
         // should not be reached ever, but in case of error elsewhere,
         // this branch will catch it
-        _ => Err(format!("Unrecognized operator: {c}")),
+        _ => Err(format!("Unrecognized operator: {op:?}")),
     }
 }
 
-/// Token can represent either a `Number`, a `Float`, a `Variable` or an `Operator`
-///
-/// Now, one can create a `Vec<Token>` with numbers and operators mixed without
-/// losing type safety.
-///
-/// ```
-/// let a = Number(1);
-/// let b = Operator('+');
-/// let output = vec![a, b];
-/// ```
-///
-#[derive(Debug, PartialEq)]
-pub enum Token {
-    Number(f64),
-    Operator(char),
-    Float(f64),
-    Variable(String),
-}
 
 #[cfg(test)]
 mod eval_postfix_tests {
     use super::*;
+//    use super::Number::{Integer, Float};
+    use super::Operator::*;
 
     #[test]
     fn single_digit_works() {
@@ -201,7 +187,7 @@ mod eval_postfix_tests {
     #[test]
     fn one_one_plus_works() {
         let calculator = Calculator::new();
-        let test_vec = vec![Number(1.0), Number(1.0), Operator('+')];
+        let test_vec = vec![Number(1.0), Number(1.0), Op(Plus)];
         let res = calculator.eval_postfix(test_vec).unwrap();
 
         assert_eq!(res, 2.0);
@@ -213,9 +199,9 @@ mod eval_postfix_tests {
         let test_vec = vec![
             Number(3.0),
             Number(2.0),
-            Operator('*'),
+            Op(Mul),
             Number(4.0),
-            Operator('+'),
+            Op(Plus)
         ];
         let res = calculator.eval_postfix(test_vec).unwrap();
 
@@ -225,7 +211,7 @@ mod eval_postfix_tests {
     #[test]
     fn operator_before_numbers_returns_error() {
         let calculator = Calculator::new();
-        let test_vec = vec![Operator('+'), Number(1.0), Number(2.0)];
+        let test_vec = vec![Op(Plus), Number(1.0), Number(2.0)];
         let res = calculator.eval_postfix(test_vec);
 
         assert!(res.is_err());
@@ -234,7 +220,7 @@ mod eval_postfix_tests {
     #[test]
     fn too_many_operators_returns_error() {
         let calculator = Calculator::new();
-        let test_vec = vec![Number(1.0), Number(1.0), Operator('*'), Operator('+')];
+        let test_vec = vec![Number(1.0), Number(1.0), Op(Mul), Op(Plus)];
 
         let res = calculator.eval_postfix(test_vec);
 
@@ -244,7 +230,7 @@ mod eval_postfix_tests {
     #[test]
     fn too_many_numbers_returns_error() {
         let calculator = Calculator::new();
-        let test_vec = vec![Number(1.0), Number(1.0), Operator('/'), Number(1.0)];
+        let test_vec = vec![Number(1.0), Number(1.0), Op(Div), Number(1.0)];
         let res = calculator.eval_postfix(test_vec);
 
         assert!(res.is_err());
@@ -254,45 +240,46 @@ mod eval_postfix_tests {
 #[cfg(test)]
 mod operate_tests {
     use super::operate;
+    use super::Operator::*;
 
     #[test]
     fn one_plus_one_is_two() {
-        let res = operate(1.0, 1.0, '+');
+        let res = operate(1.0, 1.0, Plus);
 
         assert_eq!(res.unwrap(), 2.0);
     }
 
     #[test]
     fn two_times_four_is_eight() {
-        let res = operate(2.0, 4.0, '*');
+        let res = operate(2.0, 4.0, Mul);
 
         assert_eq!(res.unwrap(), 8.0);
     }
 
     #[test]
     fn four_div_eight_is_half() {
-        let res = operate(4.0, 8.0, '/');
+        let res = operate(4.0, 8.0, Div);
 
         assert_eq!(res.unwrap(), 0.5);
     }
 
     #[test]
     fn one_minus_two_is_minus_one() {
-        let res = operate(1.0, 2.0, '-');
+        let res = operate(1.0, 2.0, Minus);
 
         assert_eq!(res.unwrap(), -1.0);
     }
 
     #[test]
     fn unknown_operator_returns_err() {
-        let res = operate(1.0, 10.0, '?');
+        let res = operate(1.0, 10.0, Rparen);
 
         assert!(res.is_err());
     }
 
     #[test]
     fn divide_by_zero_returns_nan() {
-        let res = operate(1.0, 0.0, '/');
+        let res = operate(1.0, 0.0, Div);
 
         assert!(res.is_err());
     }
