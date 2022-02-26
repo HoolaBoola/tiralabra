@@ -1,5 +1,5 @@
 use super::enums::Token::{self, *};
-use super::enums::Number;
+//use super::enums::Number;
 use super::enums::Operator;
 use super::enums::Function;
 
@@ -63,15 +63,8 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
                 chars.next();
             }
 
-            // if the number contained a decimal separator ('.'), then push a Token::Float
-            // else, push a Token::Number
-            if found_decimal {
-                let &num = &num_string.parse::<f64>().unwrap();
-                output.push(Value(Number::Float(num)));
-            } else {
-                let &num = &num_string.parse::<i64>().unwrap();
-                output.push(Value(Number::Integer(num)));
-            }
+            let &num = &num_string.parse::<f64>().unwrap();
+            output.push(Number(num));
             continue;
         }
 
@@ -156,6 +149,7 @@ fn get_function(s: &str) -> Option<Function> {
 #[cfg(test)]
 mod tokenize_tests {
     use super::*;
+    use super::Operator::*;
 
     #[test]
     fn simple_case() {
@@ -170,7 +164,7 @@ mod tokenize_tests {
         let test_str = "1 + * /";
         let result = tokenize(test_str).unwrap();
 
-        let correct = vec![Number(1.0), Operator('+'), Operator('*'), Operator('/')];
+        let correct = vec![Number(1.0), Op(Plus), Op(Mul), Op(Div)];
 
         assert_eq!(result, correct);
     }
@@ -180,7 +174,7 @@ mod tokenize_tests {
         let test_str = "1.5";
         let result = tokenize(test_str).unwrap();
 
-        assert_eq!(result, vec![Float(1.5)]);
+        assert_eq!(result, vec![Number(1.5)]);
     }
 
     #[test]
@@ -188,7 +182,7 @@ mod tokenize_tests {
         let test_str = "a + 1";
         let result = tokenize(test_str).unwrap();
 
-        let correct = vec![Variable("a".to_string()), Operator('+'), Number(1.0)];
+        let correct = vec![Variable("a".to_string()), Op(Plus), Number(1.0)];
 
         assert_eq!(result, correct);
     }
@@ -219,7 +213,7 @@ mod is_operator_tests {
         let operators = ['+', '-', '*', '/', '^', '(', ')'];
 
         for operator in operators {
-            assert!(is_operator(operator));
+            assert!(get_operator(operator).is_some());
         }
     }
 
@@ -228,7 +222,7 @@ mod is_operator_tests {
         let not_operators = ['a', '1', '€', '?', '.'];
 
         for not_operator in not_operators {
-            assert!(!is_operator(not_operator));
+            assert!(get_operator(not_operator).is_none());
         }
     }
 }

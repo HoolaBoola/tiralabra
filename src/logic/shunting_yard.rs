@@ -1,6 +1,6 @@
-use super::enums::Token::{self, Value, Variable, Op};
+use super::enums::Token::{self, Variable, Op, Number};
 use super::enums::Operator::{self, Lparen, Rparen, Plus, Minus, Mul, Div, Pow};
-use super::enums::Number::{Integer, Float};
+// use super::enums::Number::{Integer, Float};
 /// Returns the precedence value for given operator, as described in
 /// [here](https://en.wikipedia.org/wiki/Shunting-yard_algorithm#Detailed_example):
 ///
@@ -84,7 +84,7 @@ pub fn shunting_yard(input: Vec<Token>) -> Result<Vec<Token>, String> {
                     operators.push(op);
                 }
             }
-            Value(Integer(_) | Float(_)) | Variable(_) => {
+            Number(_) | Variable(_) => {
                 if is_operator_time {
                     return Err("Too many numbers in a row".to_string());
                 }
@@ -119,9 +119,9 @@ mod shunting_yard_tests {
 
     #[test]
     fn one_plus_one_works() {
-        let tokens = vec![Number(1.0), Operator('+'), Number(1.0)];
+        let tokens = vec![Number(1.0), Op(Plus), Number(1.0)];
         let res = shunting_yard(tokens).unwrap();
-        let correct = vec![Number(1.0), Number(1.0), Operator('+')];
+        let correct = vec![Number(1.0), Number(1.0), Op(Plus)];
         assert_eq!(res, correct);
     }
 
@@ -129,9 +129,9 @@ mod shunting_yard_tests {
     fn one_plus_two_times_four_works() {
         let tokens = vec![
             Number(1.0),
-            Operator('+'),
+            Op(Plus),
             Number(2.0),
-            Operator('*'),
+            Op(Mul),
             Number(4.0),
         ];
         let res = shunting_yard(tokens).unwrap();
@@ -139,8 +139,8 @@ mod shunting_yard_tests {
             Number(1.0),
             Number(2.0),
             Number(4.0),
-            Operator('*'),
-            Operator('+'),
+            Op(Mul),
+            Op(Plus),
         ];
         assert_eq!(res, correct);
     }
@@ -149,9 +149,9 @@ mod shunting_yard_tests {
     fn exponents_work() {
         let tokens = vec![
             Number(2.0),
-            Operator('^'),
+            Op(Pow),
             Number(4.0),
-            Operator('*'),
+            Op(Mul),
             Number(2.0),
         ];
 
@@ -159,9 +159,9 @@ mod shunting_yard_tests {
         let correct = vec![
             Number(2.0),
             Number(4.0),
-            Operator('^'),
+            Op(Pow),
             Number(2.0),
-            Operator('*'),
+            Op(Mul),
         ];
 
         assert_eq!(res, correct);
@@ -171,11 +171,11 @@ mod shunting_yard_tests {
     fn mismatched_right_parenthesis_errors() {
         let tokens = vec![
             Number(1.0),
-            Operator('+'),
+            Op(Plus),
             Number(2.0),
-            Operator('*'),
+            Op(Mul),
             Number(3.0),
-            Operator(')'),
+            Op(Rparen),
         ];
         let res = shunting_yard(tokens);
         assert!(res.is_err());
@@ -185,10 +185,10 @@ mod shunting_yard_tests {
     fn mismatched_left_parenthesis_errors() {
         let tokens = vec![
             Number(1.0),
-            Operator('+'),
-            Operator('('),
+            Op(Plus),
+            Op(Lparen),
             Number(2.0),
-            Operator('*'),
+            Op(Mul),
             Number(3.0),
         ];
         let res = shunting_yard(tokens);
@@ -197,7 +197,7 @@ mod shunting_yard_tests {
 
     #[test]
     fn too_many_numbers_in_a_row() {
-        let tokens = vec![Number(1.0), Number(2.0), Operator('*'), Number(100.0)];
+        let tokens = vec![Number(1.0), Number(2.0), Op(Mul), Number(100.0)];
 
         let res = shunting_yard(tokens);
 
