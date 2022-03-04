@@ -74,85 +74,49 @@ impl Function {
     }
 }
 
-// #[derive(Debug, PartialEq, Clone, Copy)]
-// pub enum Number {
-//     Integer(i64),
-//     Float(f64)
-// }
-// 
-// use Number::{Integer, Float};
-// 
-// impl std::ops::Add for Number {
-//     type Output = Self;
-// 
-//     fn add(self, other: Self) -> Self {
-//         match (self, other) {
-//             (Integer(a), Integer(b)) => Integer(a + b),
-//             (Float(a), Integer(b)) => Float(a + b as f64),
-//             (Integer(a), Float(b)) => Float(a as f64 + b),
-//             (Float(a), Float(b)) => Float(a + b)
-//         }
-//     }
-// }
-// 
-// impl std::ops::Sub for Number {
-//     type Output = Self;
-// 
-//     fn sub(self, other: Self) -> Self {
-//         match (self, other) {
-//             (Integer(a), Integer(b)) => Integer(a - b),
-//             (Float(a), Integer(b)) => Float(a - b as f64),
-//             (Integer(a), Float(b)) => Float(a as f64 - b),
-//             (Float(a), Float(b)) => Float(a - b)
-//         }
-//     }
-// }
-// 
-// impl std::ops::Mul for Number {
-//     type Output = Self;
-// 
-//     fn mul(self, other: Self) -> Self {
-//         match (self, other) {
-//             (Integer(a), Integer(b)) => Integer(a * b),
-//             (Float(a), Integer(b)) => Float(a * b as f64),
-//             (Integer(a), Float(b)) => Float(a as f64 * b),
-//             (Float(a), Float(b)) => Float(a * b)
-//         }
-//     }
-// }
-// 
-// impl std::ops::Div for Number {
-//     type Output = Self;
-// 
-//     fn div(self, other: Self) -> Self {
-//         match (self, other) {
-//             (Integer(a), Integer(b)) => Float(a as f64 / b as f64),
-//             (Float(a), Integer(b)) => Float(a / b as f64),
-//             (Integer(a), Float(b)) => Float(a as f64 / b),
-//             (Float(a), Float(b)) => Float(a / b)
-//         }
-//     }
-// }
-// 
-// impl Number {
-//     pub fn unwrap(self) -> f64 {
-//         match self {
-//             Float(a) => a,
-//             Integer(a) => a as f64
-//         }
-//     }
-// 
-//     pub fn pow(self, other: Self) -> Self {
-//         match (self, other) {
-//             (Integer(a), Integer(b)) => if b > 0 { Integer(a.pow(b as u32)) } else {Float((a as f64).powi(b as i32))},
-//             _ => Float(self.unwrap().powf(other.unwrap()))
-//         }
-//     }
-// }
-// 
-// impl std::fmt::Display for Number {
-//     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-//         write!(f, "{}", self.unwrap())
-//     }
-// }
+#[cfg(test)]
+mod function_tests {
+    use super::Function::*;
+    #[test]
+    fn evaluate_first_test() {
+        let val: f64 = 1.4;
+        let funcs = [Sin, Cos, Tan, Sqrt];
+        let correct = [val.sin(), val.cos(), val.tan(), val.sqrt()];
 
+        for (f, res) in funcs.iter().zip(correct) {
+            assert_eq!(f.evaluate(val), res);
+        }
+    }
+
+    #[test]
+    fn evaluate_second_test() {
+        let val: f64 = 1234.123;
+        let funcs = [Sin, Cos, Tan, Sqrt];
+        let correct = [val.sin(), val.cos(), val.tan(), val.sqrt()];
+
+        for (f, res) in funcs.iter().zip(correct) {
+            assert_eq!(f.evaluate(val), res);
+        }
+    }
+
+    #[test]
+    fn evaluate_third_test() {
+        let val = f64::NAN;
+        let funcs = [Sin, Cos, Tan, Sqrt];
+        let correct = [val.sin(), val.cos(), val.tan(), val.sqrt()];
+
+        for (f, res) in funcs.iter().zip(correct) {
+            assert_ne!(f.evaluate(val), res);
+        }
+    }
+
+    #[test]
+    fn format_returns_right_values() {
+        let funcs = [Sin, Cos, Tan, Sqrt];
+        let correct = ["sin", "cos", "tan", "sqrt"];
+
+        for (f, res) in funcs.iter().zip(correct) {
+            assert_eq!(f.format(), res);
+        }
+    }
+}

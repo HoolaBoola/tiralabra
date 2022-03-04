@@ -53,7 +53,7 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
                     num_string.push(c);
                 } else if c == '.' {
                     if found_decimal {
-                        // TODO: error handling (too many decimal separators)
+                        return Err(format!("Too many decimal separators: {num_string}."))
                     }
                     num_string.push(c);
                     found_decimal = true;
@@ -115,7 +115,7 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
             output.push(Op(Operator::Equals));
             continue;
         }
-        return Err(format!("unknown character: {c}"));
+        return Err(format!("Unknown character, or incorrectly placed: {c}"));
     }
     Ok(output)
 }
