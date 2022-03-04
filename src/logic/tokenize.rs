@@ -87,7 +87,7 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
 
             let mut is_function = false;
             while let Some(&c) = chars.peek() {
-                if c.is_alphabetic() {
+                if c.is_alphanumeric() {
                     var_string.push(c);
                 } else if c.is_whitespace() {
                 } else if c == '(' {
