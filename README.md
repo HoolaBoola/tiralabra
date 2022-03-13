@@ -2,6 +2,8 @@
 
 Koodikattavuus ei vielä näy missään nettisivulla, mutta [coverage](./coverage)-kansiossa on vaadittavat HTML-tiedostot kattavuustiedon näyttämiseen.
 
+Valmiit binäärit on ladattavissa Releases-osiosta. Windows-binääriä ei ole testattu Windowsissa (ohjelma koodattu Linuxilla), joten se saattaa toimia tai sitten ei. Winellä näytti toimivan.
+
 ### Oikotiet dokumentaatioon
 
 - [Dokumentaatio](./dokumentaatio)
