@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["get_function",""],["get_operator","Return true if `c` is one of the defined mathematical operators"],["tokenize","Tokenize a string into a `Vec` of Tokens."]]});
+initSidebarItems({"fn":[["get_function","Input is a `&str`, returns a Function enum:"],["get_operator","Return an `Operator` enum if `c` is one of the defined mathematical operators"],["tokenize","Tokenize a string into a `Vec` of Tokens."]]});

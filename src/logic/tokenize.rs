@@ -1,5 +1,4 @@
 use super::enums::Token::{self, *};
-//use super::enums::Number;
 use super::enums::Operator::{self, *};
 use super::enums::Function;
 
@@ -86,10 +85,20 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
             var_string.push(c);
 
             let mut is_function = false;
+            let mut found_whitespace = false;
             while let Some(&c) = chars.peek() {
                 if c.is_alphanumeric() {
+
+                    // 1 + a b + 2 is not valid syntax (`a b` is two variables after each other) 
+                    // have to check here (instead of just forbidding all whitespace) because a
+                    // function can have spaces between the characters and the parentheses:
+                    // sin (2) == sin(2)
+                    if found_whitespace {
+                        break;
+                    }
                     var_string.push(c);
                 } else if c.is_whitespace() {
+                    found_whitespace = true;
                 } else if c == '(' {
                     is_function = true;
                     break;
@@ -120,7 +129,14 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
     Ok(output)
 }
 
-/// Return true if `c` is one of the defined mathematical operators
+/// Return an `Operator` enum if `c` is one of the defined mathematical operators
+/// ```
+/// let op = get_operator('+').unwrap();
+/// assert_eq!(op, Operator::Plus);
+///
+/// let op = get_operator('a');
+/// assert_eq!(op, None);
+/// ```
 fn get_operator(c: char) -> Option<Operator> {
     use self::Operator::*;
     match c {
@@ -135,6 +151,15 @@ fn get_operator(c: char) -> Option<Operator> {
     }
 }
 
+/// Input is a `&str`, returns a Function enum:
+///
+/// ```
+/// let fun = get_function("sin").unwrap();
+/// assert_eq!(fun, Function::Sin);
+///
+/// let fun = get_function("The answer to life, the universe, and everything");
+/// assert_eq!(fun, None);
+/// ```
 fn get_function(s: &str) -> Option<Function> {
     use self::Function::*;
     match &*s.to_lowercase() {

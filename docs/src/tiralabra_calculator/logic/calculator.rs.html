@@ -306,11 +306,62 @@
 <span id="304">304</span>
 <span id="305">305</span>
 <span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">super</span>::shunting_yard</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::tokenize</span>;
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::enums::Token</span>::{<span class="self">self</span>, <span class="ident">Op</span>, <span class="ident">Variable</span>, <span class="ident">Number</span>};
-<span class="comment">// use super::enums::Number;</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::enums::Operator</span>::{<span class="self">self</span>, <span class="kw-2">*</span>};
 
 <span class="doccomment">/// Struct for keeping track of history and variables, and performing calculations.</span>
@@ -341,6 +392,8 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Calculator</span> {
+
+    <span class="doccomment">/// Creates a new `Calculator` object and initializes its variable table.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="ident">Calculator</span> {
         <span class="ident">Calculator</span> {
             <span class="ident">variables</span>: <span class="ident">HashMap::new</span>(),
@@ -349,6 +402,13 @@
 
     <span class="doccomment">/// Enter a string with an infix expression (example: &quot;2 * (2 + 1)&quot;) as parameter.</span>
     <span class="doccomment">/// Returns a result containing the evaluated result of the expression, or an error</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// let mut calculator = Calculator::new();</span>
+    <span class="doccomment">/// let res = calculator.calculate_infix(&quot;1 + 6 / 3&quot;).unwrap();</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// assert_eq!(res, &quot;3&quot;);</span>
+    <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">calculate_infix</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">String</span><span class="op">&gt;</span> {
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">eq_position</span> <span class="op">=</span> <span class="prelude-val">None</span>;
@@ -398,6 +458,14 @@
 
     <span class="doccomment">/// Calculates a postfix expression and returns a single numerical value. (Or an error if the</span>
     <span class="doccomment">/// expression is malformed)</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// let mut calculator = Calculator::new();</span>
+    <span class="doccomment">/// let tokens = vec![Number(1.0), Number(1.0), Op(Plus)];</span>
+    <span class="doccomment">/// let res = calculator.eval_postfix(tokens).unwrap();</span>
+    <span class="doccomment">/// </span>
+    <span class="doccomment">/// assert_eq!(res, 2.0);</span>
+    <span class="doccomment">/// ```</span>
     <span class="kw">fn</span> <span class="ident">eval_postfix</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">input</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">f64</span>, <span class="ident">String</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">stack</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
         <span class="kw">for</span> <span class="ident">token</span> <span class="kw">in</span> <span class="ident">input</span> {
@@ -610,6 +678,42 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">calculator</span> <span class="op">=</span> <span class="ident">Calculator::new</span>();
         <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">calculator</span>.<span class="ident">calculate_infix</span>(<span class="string">&quot;(1 + 2) * 3&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">res</span>.<span class="ident">unwrap</span>(), <span class="string">&quot;9&quot;</span>);
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">error_when_extra_before_equals</span>() {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">calculator</span> <span class="op">=</span> <span class="ident">Calculator::new</span>();
+        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">calculator</span>.<span class="ident">calculate_infix</span>(<span class="string">&quot;a b = 1&quot;</span>);
+
+        <span class="macro">assert!</span>(<span class="ident">res</span>.<span class="ident">is_err</span>());
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">error_equals_without_variable</span>() {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">calculator</span> <span class="op">=</span> <span class="ident">Calculator::new</span>();
+        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">calculator</span>.<span class="ident">calculate_infix</span>(<span class="string">&quot;= 1 + 2&quot;</span>);
+
+        <span class="macro">assert!</span>(<span class="ident">res</span>.<span class="ident">is_err</span>());
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">correct_variables_stored_and_returned</span>() {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">calculator</span> <span class="op">=</span> <span class="ident">Calculator::new</span>();
+        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">calculator</span>.<span class="ident">calculate_infix</span>(<span class="string">&quot;a = 1 + 2&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">res</span>.<span class="ident">unwrap</span>(), <span class="string">&quot;3&quot;</span>);
+
+        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">calculator</span>.<span class="ident">calculate_infix</span>(<span class="string">&quot;b = 1 + a&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">res</span>.<span class="ident">unwrap</span>(), <span class="string">&quot;4&quot;</span>);
+
+        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">calculator</span>.<span class="ident">calculate_infix</span>(<span class="string">&quot;b + a + a&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">res</span>.<span class="ident">unwrap</span>(), <span class="string">&quot;10&quot;</span>);
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">error_bad_variable_input</span>() {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">calculator</span> <span class="op">=</span> <span class="ident">Calculator::new</span>();
+        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">calculator</span>.<span class="ident">calculate_infix</span>(<span class="string">&quot;* = 1 + 2&quot;</span>);
+        <span class="macro">assert!</span>(<span class="ident">res</span>.<span class="ident">is_err</span>());
     }
 }
 </code></pre></div>
