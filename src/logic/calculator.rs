@@ -2,7 +2,6 @@ use super::shunting_yard;
 use super::tokenize;
 use std::collections::HashMap;
 use super::enums::Token::{self, Op, Variable, Number};
-// use super::enums::Number;
 use super::enums::Operator::{self, *};
 
 /// Struct for keeping track of history and variables, and performing calculations.
@@ -33,6 +32,8 @@ pub struct Calculator {
 }
 
 impl Calculator {
+
+    /// Creates a new `Calculator` object and initializes its variable table.
     pub fn new() -> Calculator {
         Calculator {
             variables: HashMap::new(),
@@ -41,6 +42,13 @@ impl Calculator {
 
     /// Enter a string with an infix expression (example: "2 * (2 + 1)") as parameter.
     /// Returns a result containing the evaluated result of the expression, or an error
+    ///
+    /// ```
+    /// let mut calculator = Calculator::new();
+    /// let res = calculator.calculate_infix("1 + 6 / 3").unwrap();
+    ///
+    /// assert_eq!(res, "3");
+    /// ```
     pub fn calculate_infix(&mut self, input: &str) -> Result<String, String> {
 
         let mut eq_position = None;
@@ -90,6 +98,14 @@ impl Calculator {
 
     /// Calculates a postfix expression and returns a single numerical value. (Or an error if the
     /// expression is malformed)
+    ///
+    /// ```
+    /// let mut calculator = Calculator::new();
+    /// let tokens = vec![Number(1.0), Number(1.0), Op(Plus)];
+    /// let res = calculator.eval_postfix(tokens).unwrap();
+    /// 
+    /// assert_eq!(res, 2.0);
+    /// ```
     fn eval_postfix(&self, input: Vec<Token>) -> Result<f64, String> {
         let mut stack = Vec::new();
         for token in input {
@@ -302,5 +318,41 @@ mod calculate_infix_tests {
         let mut calculator = Calculator::new();
         let res = calculator.calculate_infix("(1 + 2) * 3");
         assert_eq!(res.unwrap(), "9");
+    }
+
+    #[test]
+    fn error_when_extra_before_equals() {
+        let mut calculator = Calculator::new();
+        let res = calculator.calculate_infix("a b = 1");
+
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn error_equals_without_variable() {
+        let mut calculator = Calculator::new();
+        let res = calculator.calculate_infix("= 1 + 2");
+
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn correct_variables_stored_and_returned() {
+        let mut calculator = Calculator::new();
+        let res = calculator.calculate_infix("a = 1 + 2");
+        assert_eq!(res.unwrap(), "3");
+
+        let res = calculator.calculate_infix("b = 1 + a");
+        assert_eq!(res.unwrap(), "4");
+
+        let res = calculator.calculate_infix("b + a + a");
+        assert_eq!(res.unwrap(), "10");
+    }
+
+    #[test]
+    fn error_bad_variable_input() {
+        let mut calculator = Calculator::new();
+        let res = calculator.calculate_infix("* = 1 + 2");
+        assert!(res.is_err());
     }
 }
